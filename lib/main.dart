@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Bright',
+          'Brigsht',
           style: TextStyle(
             color: Colors.black,
             fontFamily: 'Billabong',
