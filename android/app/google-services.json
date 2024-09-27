@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "410107940611",
+    "project_id": "bright-6b4a2",
+    "storage_bucket": "bright-6b4a2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410107940611:android:5715bd10b9d30ca3236336",
+        "android_client_info": {
+          "package_name": "com.example.brightapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI80pRMxintetxRKhaE5Zi4RspueYzXKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
