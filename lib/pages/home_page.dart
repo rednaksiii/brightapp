@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Sample posts data
+    // Sample posts data (to be replaced with real backend data later)
     final List<Map<String, String>> posts = [
       {
         'username': 'john_doe',
