@@ -1,4 +1,4 @@
-# 🌟 Bright App
+# ☀️ Bright App
 
 Bright App is a simple yet elegant Instagram-like photo-sharing app built using **Flutter** and **Firebase**. The app allows users to register, log in, and view a feed of posts, making it a perfect starting point for building a social media app.
 
@@ -97,5 +97,3 @@ Please follow these steps to contribute:
 ## 🌐 Links
 
 - **Project Repository:** [Bright App GitHub](https://github.com/rednaksiii/brightapp)
-
-```
