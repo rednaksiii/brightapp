@@ -47,10 +47,23 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'BrightFeed',
-          style: TextStyle(color: Colors.black, fontSize: 24),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Adding the app_icon to the app bar
+            Image.asset(
+              'assets/images/app_icon.png', // Path to your app_icon file
+              width: 40, // Set the width for the app_icon
+              height: 40, // Set the height for the app_icon
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'BrightFeed',
+              style: TextStyle(color: Colors.black, fontSize: 24),
+            ),
+          ],
         ),
+        centerTitle: true, // Center the title and app_icon in the app bar
         actions: [
           IconButton(
             icon: const Icon(Icons.send, color: Colors.black),
