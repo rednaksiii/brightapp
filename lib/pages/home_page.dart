@@ -11,124 +11,107 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   User? user = FirebaseAuth.instance.currentUser;
 
-  // Track visibility of the welcome section
-  bool showWelcomeMessage = true;
+  // Sample posts data (to be replaced with real backend data later)
+  final List<Map<String, String>> posts = [
+    {
+      'username': 'john_doe',
+      'profilePicture': 'https://via.placeholder.com/150',
+      'imageUrl': 'https://picsum.photos/400/300',
+      'caption': 'Beautiful sunset in the mountains!',
+    },
+    {
+      'username': 'jane_smith',
+      'profilePicture': 'https://via.placeholder.com/150',
+      'imageUrl': 'https://picsum.photos/400/300?2',
+      'caption': 'Enjoying the beach life 🏖️',
+    },
+    {
+      'username': 'user123',
+      'profilePicture': 'https://via.placeholder.com/150',
+      'imageUrl': 'https://picsum.photos/400/300?3',
+      'caption': 'A nice cup of coffee to start the day ☕',
+    },
+  ];
+
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Sample posts data (to be replaced with real backend data later)
-    final List<Map<String, String>> posts = [
-      {
-        'username': 'john_doe',
-        'profilePicture': 'https://via.placeholder.com/150',
-        'imageUrl': 'https://picsum.photos/400/300',
-        'caption': 'Beautiful sunset in the mountains!',
-      },
-      {
-        'username': 'jane_smith',
-        'profilePicture': 'https://via.placeholder.com/150',
-        'imageUrl': 'https://picsum.photos/400/300?2',
-        'caption': 'Enjoying the beach life 🏖️',
-      },
-      {
-        'username': 'user123',
-        'profilePicture': 'https://via.placeholder.com/150',
-        'imageUrl': 'https://picsum.photos/400/300?3',
-        'caption': 'A nice cup of coffee to start the day ☕',
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BrightFeed'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'BrightFeed',
+          style: TextStyle(color: Colors.black, fontSize: 24),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.send, color: Colors.black),
             onPressed: () {
-              // Navigate to settings (optional feature to be implemented)
+              // Direct Messages button functionality to be implemented later
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Display Welcome Section if it's not hidden
-            if (showWelcomeMessage) _buildWelcomeSection(),
-            const SizedBox(height: 20),
-
-            // Feed Section Title
-            const Text(
-              'Feed:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            // Feed List
-            Expanded(
-              child: ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return PostItem(
-                    username: post['username']!,
-                    profilePicture: post['profilePicture']!,
-                    imageUrl: post['imageUrl']!,
-                    caption: post['caption']!,
-                  );
-                },
+      body: _selectedIndex == 0
+          ? ListView.builder(
+              itemCount: posts.length,
+              itemBuilder: (context, index) {
+                final post = posts[index];
+                return PostItem(
+                  username: post['username']!,
+                  profilePicture: post['profilePicture']!,
+                  imageUrl: post['imageUrl']!,
+                  caption: post['caption']!,
+                );
+              },
+            )
+          : Center(
+              child: Text(
+                _getPageTitle(_selectedIndex),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'Post'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Activity'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
       ),
     );
   }
 
-  // Welcome Section Widget
-  Widget _buildWelcomeSection() {
-    return Card(
-      elevation: 4.0,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                // Welcome Message
-                Expanded(
-                  child: Text(
-                    'Welcome, ${user?.email}!',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                // Close Button to hide the welcome message
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    setState(() {
-                      showWelcomeMessage = false;
-                    });
-                  },
-                ),
-              ],
-            ),
-            Text('User ID: ${user?.uid}'),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacementNamed('/login');
-              },
-              child: const Text('Log Out'),
-            ),
-          ],
-        ),
-      ),
-    );
+  // Function to get the title for the non-home pages
+  String _getPageTitle(int index) {
+    switch (index) {
+      case 1:
+        return 'Search Page';
+      case 2:
+        return 'Post Page';
+      case 3:
+        return 'Activity Page';
+      case 4:
+        return 'Profile Page';
+      default:
+        return 'Page';
+    }
   }
 }
 
@@ -176,20 +159,35 @@ class PostItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Row(
               children: [
-                Icon(Icons.favorite_border),
+                IconButton(
+                  icon: const Icon(Icons.favorite_border),
+                  onPressed: () {},
+                ),
                 const SizedBox(width: 15),
-                Icon(Icons.chat_bubble_outline),
+                IconButton(
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  onPressed: () {},
+                ),
                 const SizedBox(width: 15),
-                Icon(Icons.send),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () {},
+                ),
                 const Spacer(),
-                Icon(Icons.bookmark_border),
+                IconButton(
+                  icon: const Icon(Icons.bookmark_border),
+                  onPressed: () {},
+                ),
               ],
             ),
           ),
           // Post caption
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text('$username: $caption'),
+            child: Text(
+              '$username: $caption',
+              style: const TextStyle(fontSize: 16),
+            ),
           ),
           const SizedBox(height: 10),
         ],
