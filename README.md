@@ -60,16 +60,18 @@ The project is organized as follows:
 
 ```
 lib/
-├── main.dart                 # Entry point of the app
-├── routes.dart               # Defines the app's navigation routes
-├── pages/                    # Contains individual screens of the app
-│   ├── home_page.dart        # Home page with user details and feed
-│   ├── login_page.dart       # Login page for authentication
-│   └── register_page.dart    # Registration page for new users
-├── controlers/               # Custom widgets used throughout the app
-│    └── auth_controller.dart # Controller for handling authentication
-└── widgets/                  # Custom widgets used throughout the app
-    └── post_item.dart        # Widget for displaying individual posts in the feed (not added yet)  
+├── main.dart                   # Entry point of the app
+├── routes.dart                 # Defines the app's navigation routes
+├── pages/                      # Contains individual screens of the app
+│   ├── home_page.dart          # Home page with user details and feed
+│   ├── login_page.dart         # Login page for authentication
+│   ├── profile_page.dart       # Profile page displaying the user's infomation
+│   ├── controller_wrapper.dart # Wrapper page managing the bottom navigation
+│   └── register_page.dart      # Registration page for new users
+├── controlers/                 # Custom widgets used throughout the app
+│    └── auth_controller.dart   # Controller for handling authentication
+└── widgets/                    # Custom widgets used throughout the app
+    └── post_item.dart          # Widget for displaying individual posts in the feed (not added yet)  
     
 ```
 
