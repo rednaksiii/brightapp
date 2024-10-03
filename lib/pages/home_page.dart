@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -36,9 +36,12 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  setState(() {
+    _selectedIndex = index;
+  });
+  if (index == 4) {
+    Navigator.of(context).pushNamed('/profile'); // Navigate to ProfilePage
+  }
   }
 
   @override
@@ -135,7 +138,7 @@ class PostItem extends StatelessWidget {
   final String imageUrl;
   final String caption;
 
-  const PostItem({
+  const PostItem({super.key, 
     required this.username,
     required this.profilePicture,
     required this.imageUrl,

@@ -13,7 +13,7 @@ void main() async {
 }
 
 class BrightApp extends StatelessWidget {
-  const BrightApp({Key? key}) : super(key: key);
+  const BrightApp({super.key});
 
   @override
   Widget build(BuildContext context) {
