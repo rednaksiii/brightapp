@@ -32,15 +32,27 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: _selectedIndex == 4
-            ? const Text(
-                'Profile',
-                style: TextStyle(color: Colors.black, fontSize: 24),
+        title: _selectedIndex == 0
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/app_icon.png', // Add the app_icon path
+                    width: 40, // Set the width for the app_icon
+                    height: 40, // Set the height for the app_icon
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'BrightFeed',
+                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  ),
+                ],
               )
             : const Text(
-                'BrightFeed',
+                'Profile',
                 style: TextStyle(color: Colors.black, fontSize: 24),
               ),
+        centerTitle: true, // Center the app icon and title in the app bar
         actions: [
           if (_selectedIndex == 0)
             IconButton(
@@ -48,11 +60,10 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
               onPressed: () {
                 // Direct Messages button functionality to be implemented later
               },
-            )
+            ),
         ],
-        centerTitle: true,
       ),
-      body: _pages[_selectedIndex],  // Display the current page based on _selectedIndex
+      body: _pages[_selectedIndex], // Display the current page based on _selectedIndex
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
