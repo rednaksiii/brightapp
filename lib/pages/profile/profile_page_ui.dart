@@ -1,13 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brightapp/pages/profile/profile_page_logic.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+class ProfilePageUI extends StatelessWidget {
+  const ProfilePageUI({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Get the current logged-in user
-    User? user = FirebaseAuth.instance.currentUser;
+    final ProfilePageLogic profileLogic = ProfilePageLogic();
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +38,7 @@ class ProfilePage extends StatelessWidget {
                   CircleAvatar(
                     radius: 50,
                     backgroundImage: NetworkImage(
-                      user?.photoURL ?? 'https://via.placeholder.com/150', // Show user profile picture if available
+                      profileLogic.userProfileImage, // Use profile picture from logic
                     ),
                   ),
                   const SizedBox(width: 20),
@@ -49,16 +48,16 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: const [
-                            _StatColumn("0", "Posts"), // Set to 0 for now; will update once we implement post tracking
-                            _StatColumn("0", "Followers"), // Placeholder for followers count
-                            _StatColumn("0", "Following"), // Placeholder for following count
+                          children: [
+                            _StatColumn(profileLogic.postsCount.toString(), "Posts"),
+                            _StatColumn(profileLogic.followersCount.toString(), "Followers"),
+                            _StatColumn(profileLogic.followingCount.toString(), "Following"),
                           ],
                         ),
                         const SizedBox(height: 10),
                         // Username
                         Text(
-                          user?.displayName ?? "User", // Display the logged-in user's name
+                          profileLogic.userName,
                           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -71,7 +70,7 @@ class ProfilePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                user?.email ?? 'No email available',
+                profileLogic.userEmail,
                 style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
             ),

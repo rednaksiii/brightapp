@@ -1,46 +1,46 @@
+import 'package:brightapp/pages/home/home_page_logic.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomePageUI extends StatelessWidget {
+  const HomePageUI({super.key});
 
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
 
-    // Sample posts data (replace with real backend data later)
-    final List<Map<String, String>> posts = [
-      {
-        'username': 'john_doe',
-        'profilePicture': 'https://via.placeholder.com/150',
-        'imageUrl': 'https://picsum.photos/400/300',
-        'caption': 'Beautiful sunset in the mountains!',
-      },
-      {
-        'username': 'jane_smith',
-        'profilePicture': 'https://via.placeholder.com/150',
-        'imageUrl': 'https://picsum.photos/400/300?2',
-        'caption': 'Enjoying the beach life 🏖️',
-      },
-      {
-        'username': 'user123',
-        'profilePicture': 'https://via.placeholder.com/150',
-        'imageUrl': 'https://picsum.photos/400/300?3',
-        'caption': 'A nice cup of coffee to start the day ☕',
-      },
-    ];
+    // Create an instance of the backend logic
+    final HomePageLogic homePageLogic = HomePageLogic();
 
-    return ListView.builder(
-      itemCount: posts.length,
-      itemBuilder: (context, index) {
-        final post = posts[index];
-        return PostItem(
-          username: post['username']!,
-          profilePicture: post['profilePicture']!,
-          imageUrl: post['imageUrl']!,
-          caption: post['caption']!,
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'BrightFeed',
+          style: TextStyle(color: Colors.black, fontSize: 24),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.send, color: Colors.black),
+            onPressed: () {
+              // Direct Messages button functionality to be implemented later
+            },
+          ),
+        ],
+      ),
+      body: ListView.builder(
+        itemCount: homePageLogic.posts.length, // Accessing posts from backend logic
+        itemBuilder: (context, index) {
+          final post = homePageLogic.posts[index];
+          return PostItem(
+            username: post['username']!,
+            profilePicture: post['profilePicture']!,
+            imageUrl: post['imageUrl']!,
+            caption: post['caption']!,
+          );
+        },
+      ),
     );
   }
 }
@@ -52,7 +52,8 @@ class PostItem extends StatelessWidget {
   final String imageUrl;
   final String caption;
 
-  const PostItem({super.key, 
+  const PostItem({
+    super.key,
     required this.username,
     required this.profilePicture,
     required this.imageUrl,
