@@ -81,7 +81,7 @@ Thanks to everyone who has contributed to this project:
 
 - [Iskandar Kholmatov](https://github.com/rednaksiii)
 - [Aiden Kim](https://github.com/)
-- [Martina Veit Acosta](https://github.com/)
+- [Martina Veit Acosta](https://github.com/tinaveit)
 - [Aylin Aytemiz](https://github.com/)
 - [Jin Park](https://github.com/)
 
