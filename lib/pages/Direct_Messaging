@@ -1,0 +1,120 @@
+flutter create bright_dm
+cd bright_dm
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.0
+flutter pub get
+class Message {
+  final String sender;
+  final String text;
+  final DateTime timestamp;
+
+  Message({required this.sender, required this.text})
+      : timestamp = DateTime.now();
+}
+import 'package:flutter/material.dart';
+import 'message.dart';
+
+class MessageProvider with ChangeNotifier {
+  List<Message> _messages = [];
+
+  List<Message> get messages => _messages;
+
+  void addMessage(String sender, String text) {
+    _messages.add(Message(sender: sender, text: text));
+    notifyListeners();
+  }
+}
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'message_provider.dart';
+
+class MessagingScreen extends StatefulWidget {
+  @override
+  _MessagingScreenState createState() => _MessagingScreenState();
+}
+
+class _MessagingScreenState extends State<MessagingScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Direct Messages"),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Consumer<MessageProvider>(
+              builder: (context, messageProvider, child) {
+                return ListView.builder(
+                  itemCount: messageProvider.messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messageProvider.messages[index];
+                    return ListTile(
+                      title: Text(message.sender),
+                      subtitle: Text(message.text),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: "Send a message",
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () {
+                    final text = _controller.text;
+                    if (text.isNotEmpty) {
+                      Provider.of<MessageProvider>(context, listen: false)
+                          .addMessage("You", text);
+                      _controller.clear();
+                    }
+                  },
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'message_provider.dart';
+import 'messaging_screen.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => MessageProvider(),
+      child: MaterialApp(
+        title: 'Bright DM',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MessagingScreen(),
+      ),
+    );
+  }
+}
+flutter run
