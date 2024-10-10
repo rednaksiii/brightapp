@@ -1,11 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:brightapp/controllers/auth_controller.dart';
 
 class LoginPageLogic {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> login(BuildContext context, String email, String password) async {
+  Future<void> login(
+      BuildContext context, String email, String password) async {
     isLoading = true;
     errorMessage = null;
 
@@ -29,6 +32,45 @@ class LoginPageLogic {
     } catch (e) {
       errorMessage = 'An unexpected error occurred.';
       print('Unexpected error: $e'); // Print the exact error
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  Future<void> signInWithFacebook(BuildContext context) async {
+    isLoading = true;
+    errorMessage = null;
+
+    try {
+      // Use the fb login provided by auth_controller.dart
+      final authController =
+          Provider.of<AuthController>(context, listen: false);
+      await authController.signInWithFacebook();
+
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      errorMessage = e.toString();
+      print('Facebook Login Error: $e');
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  Future<void> signInWithGoogle(BuildContext context) async {
+    isLoading = true;
+    errorMessage = null;
+
+    try {
+      // Use the google login provided by auth_controller.dart
+      final authController =
+          Provider.of<AuthController>(context, listen: false);
+      await authController.signInWithGoogle();
+
+      // return homepage when login succeed
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      errorMessage = e.toString();
+      print('Google Login Error: $e');
     } finally {
       isLoading = false;
     }
