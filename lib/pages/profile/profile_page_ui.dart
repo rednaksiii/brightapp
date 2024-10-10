@@ -1,8 +1,13 @@
 import 'package:brightapp/pages/profile/profile_page_logic.dart';
 import 'package:flutter/material.dart';
 
+<<<<<<< HEAD:lib/pages/profile_page.dart
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+=======
 class ProfilePageUI extends StatelessWidget {
   const ProfilePageUI({Key? key}) : super(key: key);
+>>>>>>> 7bfc9d42c8614d57cf7f94e15d9372f2a6afb1e5:lib/pages/profile/profile_page_ui.dart
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +116,7 @@ class _StatColumn extends StatelessWidget {
   final String count;
   final String label;
 
-  const _StatColumn(this.count, this.label, {Key? key}) : super(key: key);
+  const _StatColumn(this.count, this.label);
 
   @override
   Widget build(BuildContext context) {

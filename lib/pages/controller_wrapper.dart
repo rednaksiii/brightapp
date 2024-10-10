@@ -3,7 +3,7 @@ import 'package:brightapp/pages/profile/profile_page_ui.dart';
 import 'package:flutter/material.dart';
 
 class ControllerWrapper extends StatefulWidget {
-  const ControllerWrapper({Key? key}) : super(key: key);
+  const ControllerWrapper({super.key});
 
   @override
   _ControllerWrapperState createState() => _ControllerWrapperState();
@@ -21,11 +21,17 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
     const ProfilePageUI(),  // Updated ProfilePage to ProfilePageUI
   ];
 
-  // Handle navigation bar tap
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  void _onItemTapped(int index) async {
+    // If the "Post" tab is selected, open the image picker.
+    if (index == 2) {
+      // Logic for opening the image picker when the "Post" tab is selected
+      await Navigator.pushNamed(context, '/post'); // Navigates to the image picker
+    } else {
+      // For other tabs, simply change the page
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   @override
