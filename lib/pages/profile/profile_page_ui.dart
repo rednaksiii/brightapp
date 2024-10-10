@@ -1,13 +1,8 @@
 import 'package:brightapp/pages/profile/profile_page_logic.dart';
 import 'package:flutter/material.dart';
 
-<<<<<<< HEAD:lib/pages/profile_page.dart
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-=======
 class ProfilePageUI extends StatelessWidget {
   const ProfilePageUI({Key? key}) : super(key: key);
->>>>>>> 7bfc9d42c8614d57cf7f94e15d9372f2a6afb1e5:lib/pages/profile/profile_page_ui.dart
 
   @override
   Widget build(BuildContext context) {
