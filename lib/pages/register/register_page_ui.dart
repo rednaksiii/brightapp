@@ -2,7 +2,7 @@ import 'package:brightapp/pages/register/register_page_logic.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPageUI extends StatelessWidget {
-  const RegisterPageUI({Key? key}) : super(key: key);
+  const RegisterPageUI({super.key});
 
   @override
   Widget build(BuildContext context) {
