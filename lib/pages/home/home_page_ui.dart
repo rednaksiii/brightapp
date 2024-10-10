@@ -2,13 +2,8 @@ import 'package:brightapp/pages/home/home_page_logic.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-<<<<<<< HEAD:lib/pages/home_page.dart
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
-=======
-class HomePageUI extends StatelessWidget {
-  const HomePageUI({super.key});
->>>>>>> 7bfc9d42c8614d57cf7f94e15d9372f2a6afb1e5:lib/pages/home/home_page_ui.dart
 
   @override
   Widget build(BuildContext context) {

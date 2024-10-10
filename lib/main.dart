@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:brightapp/controllers/auth_controller.dart';
-<<<<<<< HEAD
-=======
-import 'package:brightapp/pages/home/home_page_ui.dart';
-import 'package:brightapp/pages/login/login_page_ui.dart';
->>>>>>> 7bfc9d42c8614d57cf7f94e15d9372f2a6afb1e5
 import 'package:brightapp/routes.dart';
 
 void main() async {
