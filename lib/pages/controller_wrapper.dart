@@ -1,5 +1,5 @@
-import 'package:brightapp/pages/home_page.dart';
-import 'package:brightapp/pages/profile_page.dart';
+import 'package:brightapp/pages/home/home_page_ui.dart';
+import 'package:brightapp/pages/profile/profile_page_ui.dart';
 import 'package:flutter/material.dart';
 
 class ControllerWrapper extends StatefulWidget {
@@ -12,12 +12,13 @@ class ControllerWrapper extends StatefulWidget {
 class _ControllerWrapperState extends State<ControllerWrapper> {
   int _selectedIndex = 0;
 
+  // Define pages using the new UI structure
   final List<Widget> _pages = [
-    const HomePage(),
+    const HomePageUI(),  // Updated HomePage to HomePageUI
     const Center(child: Text('Search Page')),  // Placeholder for Search Page
     const Center(child: Text('Post Page')),    // Placeholder for Post Page
     const Center(child: Text('Activity Page')), // Placeholder for Activity Page
-    const ProfilePage(),  // Use the ProfilePage here
+    const ProfilePageUI(),  // Updated ProfilePage to ProfilePageUI
   ];
 
   void _onItemTapped(int index) async {
@@ -44,7 +45,7 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/app_icon.png', // Add the app_icon path
+                    'assets/images/app_icon.png', // Path to the app icon
                     width: 40, // Set the width for the app_icon
                     height: 40, // Set the height for the app_icon
                   ),
@@ -55,10 +56,15 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
                   ),
                 ],
               )
-            : const Text(
-                'Profile',
-                style: TextStyle(color: Colors.black, fontSize: 24),
-              ),
+            : _selectedIndex == 4
+                ? const Text(
+                    'Profile',
+                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  )
+                : const Text(
+                    'BrightApp',
+                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  ),
         centerTitle: true, // Center the app icon and title in the app bar
         actions: [
           if (_selectedIndex == 0)
