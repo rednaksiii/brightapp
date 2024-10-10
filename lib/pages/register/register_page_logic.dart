@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '/controllers/auth_controller.dart';
 
 class RegisterPageLogic {
   final BuildContext context;
@@ -8,9 +10,16 @@ class RegisterPageLogic {
   // Controllers for the TextFields
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  // // for confirm password
+  // final RegisterPageLogic registerLogic = RegisterPageLogic(context);
 
   // Error message string
   String errorMessage = '';
+
+  // Track if passwords match // for confirmpassword
+  // bool passwordsMatch = true;
 
   // Constructor to initialize context
   RegisterPageLogic(this.context);
@@ -29,6 +38,28 @@ class RegisterPageLogic {
     }
   }
 
+  // Google Sign-In
+  Future<void> signInWithGoogle() async {
+    final authController = Provider.of<AuthController>(context, listen: false);
+    try {
+      await authController.signInWithGoogle();
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      errorMessage = e.toString();
+    }
+  }
+
+  // Facebook Sign-In
+  Future<void> signInWithFacebook() async {
+    final authController = Provider.of<AuthController>(context, listen: false);
+    try {
+      await authController.signInWithFacebook();
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      errorMessage = e.toString();
+    }
+  }
+
   // Navigate to login page
   void navigateToLogin() {
     Navigator.of(context).pushReplacementNamed('/login');
@@ -39,4 +70,9 @@ class RegisterPageLogic {
     emailController.dispose();
     passwordController.dispose();
   }
+
+  // // Method to check if passwords match // for confirm password
+  // void checkPasswordsMatch() {
+  //   passwordsMatch = passwordController.text == confirmPasswordController.text;
+  // }
 }
