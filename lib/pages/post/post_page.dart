@@ -17,6 +17,7 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
   dynamic _pickImageError;
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
+  final TextEditingController _captionController = TextEditingController(); // Caption controller
 
   Future<void> _onImageButtonPressed(
     ImageSource source, {
@@ -51,25 +52,34 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
       _isUploading = true;
     });
 
+    String caption = _captionController.text; // Get the caption text
+
     for (XFile imageFile in _imageFileList!) {
       // Upload the image to Firebase
       final imageUrl = await uploadImageToFirebase(imageFile);
       
       if (imageUrl != null) {
-        // Create a post in Firestore
-        await createPost(imageUrl, 'A new post', FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous');
+        // Create a post in Firestore with the image URL and caption
+        await createPost(imageUrl, caption, FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous');
       }
     }
 
     setState(() {
       _isUploading = false;
       _imageFileList = null;
+      _captionController.clear(); // Clear the caption field after upload
     });
 
     // Navigate back to home after posting
     if (mounted) {
       Navigator.pop(context);
     }
+  }
+
+  @override
+  void dispose() {
+    _captionController.dispose(); // Dispose of the controller to avoid memory leaks
+    super.dispose();
   }
 
   @override
@@ -87,7 +97,22 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
       body: Center(
         child: _isUploading
             ? const CircularProgressIndicator()
-            : _previewImages(),
+            : Column(
+                children: [
+                  Expanded(child: _previewImages()),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: _captionController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        hintText: 'Write a caption...',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
