@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +112,7 @@ class _StatColumn extends StatelessWidget {
   final String count;
   final String label;
 
-  const _StatColumn(this.count, this.label, {Key? key}) : super(key: key);
+  const _StatColumn(this.count, this.label);
 
   @override
   Widget build(BuildContext context) {
