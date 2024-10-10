@@ -2,7 +2,7 @@ import 'package:brightapp/pages/profile/profile_page_logic.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePageUI extends StatelessWidget {
-  const ProfilePageUI({Key? key}) : super(key: key);
+  const ProfilePageUI({super.key});
 
   @override
   Widget build(BuildContext context) {
