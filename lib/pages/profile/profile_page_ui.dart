@@ -1,5 +1,7 @@
 import 'package:brightapp/pages/profile/profile_page_logic.dart';
 import 'package:flutter/material.dart';
+import 'package:brightapp/pages/profile/profile_imagepicker.dart';
+
 
 class ProfilePageUI extends StatelessWidget {
   const ProfilePageUI({super.key});
@@ -82,7 +84,10 @@ class ProfilePageUI extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () {
-                    // Optional: Navigate to Edit Profile Page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfileImagePickerPage()),
+                    );
                   },
                   child: const Text('Edit Profile'),
                 ),

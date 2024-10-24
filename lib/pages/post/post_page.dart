@@ -17,6 +17,7 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
   dynamic _pickImageError;
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
+  bool _imagesPicked = false; // Step control: tracks if images are picked
   final TextEditingController _captionController = TextEditingController(); // Caption controller
 
   Future<void> _onImageButtonPressed(
@@ -29,11 +30,13 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
         final List<XFile> pickedFileList = await _picker.pickMultiImage();
         setState(() {
           _imageFileList = pickedFileList;
+          _imagesPicked = true; // Move to step 2 once images are picked
         });
       } else {
         final XFile? pickedFile = await _picker.pickImage(source: source);
         setState(() {
           _imageFileList = pickedFile == null ? null : [pickedFile];
+          _imagesPicked = true; // Move to step 2 once images are picked
         });
       }
     } catch (e) {
@@ -87,70 +90,112 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Post'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _uploadAndPostImages,
-          ),
-        ],
+        backgroundColor: Colors.white, // Keep the AppBar white and untouched
       ),
-      body: Center(
-        child: _isUploading
-            ? const CircularProgressIndicator()
-            : Column(
-                children: [
-                  Expanded(child: _previewImages()),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: _captionController,
-                      maxLines: 2,
-                      decoration: const InputDecoration(
-                        hintText: 'Write a caption...',
-                        border: OutlineInputBorder(),
-                      ),
+      body: Container(
+        color: Colors.white, 
+        child: Center(
+          child: _isUploading
+              ? const CircularProgressIndicator()
+              : Column(
+                  children: [
+                    Expanded(
+                      child: _imagesPicked ? _previewImages() : _showInitialButtons(), // Step-based display
                     ),
-                  ),
-                ],
-              ),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            onPressed: () {
-              _onImageButtonPressed(ImageSource.gallery, context: context);
-            },
-            heroTag: 'image0',
-            tooltip: 'Pick Image from gallery',
-            child: const Icon(Icons.photo),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: FloatingActionButton(
-              onPressed: () {
-                _onImageButtonPressed(ImageSource.camera, context: context);
-              },
-              heroTag: 'image1',
-              tooltip: 'Take a Photo',
-              child: const Icon(Icons.camera_alt),
-            ),
-          ),
-        ],
+                    if (_imagesPicked)
+                      Expanded(
+                        child: SingleChildScrollView( // Make Step 2 scrollable
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: _buildCaptionBox(), // Show bigger caption box if images are picked
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: ElevatedButton(
+                                  onPressed: _uploadAndPostImages,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white, // White button color
+                                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                                  ),
+                                  child: const Text('Post', style: TextStyle(fontSize: 16, color: Colors.black)), // Black text color for contrast
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+        ),
       ),
     );
   }
 
+  // Step 1
+  Widget _showInitialButtons() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        ElevatedButton.icon(
+          onPressed: () {
+            _onImageButtonPressed(ImageSource.gallery, context: context, isMultiImage: true); // Select multiple images from gallery
+          },
+          icon: const Icon(Icons.photo),
+          label: const Text('Pick from Gallery'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white, // White button background
+          ),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton.icon(
+          onPressed: () {
+            _onImageButtonPressed(ImageSource.camera, context: context); // Select a photo from camera
+          },
+          icon: const Icon(Icons.camera_alt),
+          label: const Text('Take a Photo'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white, // White button background
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  // Step 2: Show the preview of images in half of the screen (fixed square aspect ratio)
   Widget _previewImages() {
     if (_imageFileList != null) {
-      return ListView.builder(
-        key: UniqueKey(),
-        itemBuilder: (BuildContext context, int index) {
-          return kIsWeb
-              ? Image.network(_imageFileList![index].path)
-              : Image.file(File(_imageFileList![index].path));
-        },
-        itemCount: _imageFileList!.length,
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.5, // Half the screen height
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal, // Horizontal scrollable images
+          itemBuilder: (BuildContext context, int index) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.height * 0.4, // Make the width based on height to ensure square
+                height: MediaQuery.of(context).size.height * 0.4, // Make the image square-shaped
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16), // Rounded corners
+                  child: kIsWeb
+                      ? Image.network(
+                          _imageFileList![index].path,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          File(_imageFileList![index].path),
+                          fit: BoxFit.cover,
+                        ),
+                ),
+              ),
+            );
+          },
+          itemCount: _imageFileList!.length,
+        ),
       );
     } else if (_pickImageError != null) {
       return Text(
@@ -159,9 +204,35 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
       );
     } else {
       return const Text(
-        'You have not yet picked an image.',
+        'You have not yet picked any images.',
         textAlign: TextAlign.center,
       );
     }
+  }
+
+  // Step 2: Show the caption box (Larger, rectangular shape, white border on focus, no rounded corners)
+  Widget _buildCaptionBox() {
+    return Container(
+      height: 150, // Make the caption box bigger
+      child: TextField(
+        controller: _captionController,
+        maxLines: 4,
+        style: const TextStyle(color: Colors.white), // White text inside caption box
+        decoration: InputDecoration(
+          hintText: 'Write a caption...',
+          hintStyle: const TextStyle(color: Colors.white54), // White hint text
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.black, width: 1.5), // White border on focus and thinner
+            borderRadius: BorderRadius.circular(10), 
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.black, width: 1.0), // Default white border, thinner
+            borderRadius: BorderRadius.circular(10), 
+          ),
+          fillColor: Colors.grey[800], // Darker fill color for caption box
+          filled: true, // Fill the caption box with color
+        ),
+      ),
+    );
   }
 }
