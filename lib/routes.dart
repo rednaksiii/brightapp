@@ -10,4 +10,5 @@ final Map<String, WidgetBuilder> routes = {
   '/register': (context) => const RegisterPageUI(),
   '/home': (context) => const ControllerWrapper(),  // Set ControllerWrapper as the main home
   '/post': (context) => const ImagePickerPage(),
+  '/profile': (context) => const ProfilePageUI(),     // Updated ProfilePage
 };

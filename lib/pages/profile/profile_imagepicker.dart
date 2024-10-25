@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileImagePickerPage extends StatefulWidget {
   const ProfileImagePickerPage({super.key});
@@ -25,6 +26,9 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
       });
     } catch (e) {
       print("Error picking image: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking image: $e')),
+      );
     }
   }
 
@@ -37,6 +41,9 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
       });
     } catch (e) {
       print("Error taking photo: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error taking photo: $e')),
+      );
     }
   }
 
@@ -50,7 +57,12 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
 
     try {
       final User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not logged in. Please log in again.')),
+        );
+        return;
+      }
 
       final storageRef = FirebaseStorage.instance
           .ref()
@@ -61,12 +73,16 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
       final snapshot = await uploadTask.whenComplete(() => null);
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
+      // Save the Firebase image URL in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profileImageUrl', downloadUrl); // Save the image URL
+
       // Update the user's profile with the new image URL
       await user.updatePhotoURL(downloadUrl);
 
-      // Navigate back to profile page after updating the image
+      // Pass the new image URL back to the profile page
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, downloadUrl); // Pass the image URL back to ProfilePageUI
       }
 
       // Optionally, show a success message
@@ -76,7 +92,7 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
     } catch (e) {
       print("Error uploading image: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to upload profile image.')),
+        SnackBar(content: Text('Failed to upload profile image.')),
       );
     } finally {
       setState(() {
