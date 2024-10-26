@@ -5,6 +5,7 @@ import 'profile_page_logic.dart';
 import 'edit_profile_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePageUI extends StatefulWidget {
   const ProfilePageUI({Key? key}) : super(key: key);
@@ -22,7 +23,9 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
   @override
   void initState() {
     super.initState();
-    profileLogic = ProfilePageLogic();
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    profileLogic = ProfilePageLogic(userId);
+    profileLogic.listenToFollowerFollowingUpdates();
     _loadProfileData();
   }
 
@@ -146,6 +149,35 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
             ),
           ),
           const SizedBox(height: 20),
+          // Centralized Follower and Following Counts
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      '${profileLogic.followersCount}',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const Text('Followers'),
+                  ],
+                ),
+                const SizedBox(width: 40), // Space between the two counts
+                Column(
+                  children: [
+                    Text(
+                      '${profileLogic.followingCount}',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const Text('Following'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: SizedBox(
@@ -231,4 +263,3 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
     );
   }
 }
-
