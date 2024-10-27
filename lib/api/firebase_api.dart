@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'package:brightapp/main.dart';
+import 'package:brightapp/pages/notifications/notification_screen_org.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+// https://console.firebase.google.com/u/0/project/bright-6b4a2/notification/compose
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async{
   print('Title: ${message.notification?.title}');
