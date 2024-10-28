@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:brightapp/controllers/auth_controller.dart';
 import 'package:brightapp/routes.dart';
-import 'pages/notifications/api/firebase_api_org.dart'; //Aylin added this
+import 'pages/api/firebase_api.dart'; //Aylin added this
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
