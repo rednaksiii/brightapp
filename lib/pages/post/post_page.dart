@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:brightapp/controllers/firebase_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ImagePickerPage extends StatefulWidget {
   const ImagePickerPage({super.key});
@@ -52,22 +53,36 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
       _isUploading = true;
     });
 
-    String caption = _captionController.text; // Get the caption text
+    String caption = _captionController.text;
+    User? user = FirebaseAuth.instance.currentUser; // Get the logged-in user
+    String username = user?.displayName ?? 'Anonymous';
+    String profilePicture = user?.photoURL ?? 'https://via.placeholder.com/150';
+    String userId = user?.uid ?? 'unknown';
 
     for (XFile imageFile in _imageFileList!) {
       // Upload the image to Firebase
       final imageUrl = await uploadImageToFirebase(imageFile);
-      
+
       if (imageUrl != null) {
-        // Create a post in Firestore with the image URL and caption
-        await createPost(imageUrl, caption, FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous');
+        // Create a post in Firestore within the user's 'posts' subcollection
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId) // Go to the specific user's document
+            .collection('posts') // Go to the posts subcollection
+            .add({
+          'imageUrl': imageUrl,
+          'caption': caption,
+          'username': username,
+          'timestamp': FieldValue.serverTimestamp(),
+          'userUID': userId,
+        });
       }
     }
 
     setState(() {
       _isUploading = false;
       _imageFileList = null;
-      _captionController.clear(); // Clear the caption field after upload
+      _captionController.clear();
     });
 
     // Navigate back to home after posting

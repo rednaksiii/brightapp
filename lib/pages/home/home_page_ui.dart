@@ -1,15 +1,11 @@
-import 'package:brightapp/pages/home/home_page_logic.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brightapp/pages/home/home_page_logic.dart';
 
 class HomePageUI extends StatelessWidget {
   const HomePageUI({super.key});
 
   @override
   Widget build(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
-
-    // Create an instance of the backend logic
     final HomePageLogic homePageLogic = HomePageLogic();
 
     return Scaffold(
@@ -29,15 +25,27 @@ class HomePageUI extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: homePageLogic.posts.length, // Accessing posts from backend logic
-        itemBuilder: (context, index) {
-          final post = homePageLogic.posts[index];
-          return PostItem(
-            username: post['username']!,
-            profilePicture: post['profilePicture']!,
-            imageUrl: post['imageUrl']!,
-            caption: post['caption']!,
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: homePageLogic.getPosts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No posts available"));
+          }
+
+          final posts = snapshot.data!;
+          return ListView.builder(
+            itemCount: posts.length,
+            itemBuilder: (context, index) {
+              final post = posts[index];
+              return PostItem(
+                username: post['username'] ?? 'Anonymous',
+                imageUrl: post['imageUrl'],
+                caption: post['caption'],
+              );
+            },
           );
         },
       ),
@@ -48,14 +56,12 @@ class HomePageUI extends StatelessWidget {
 // Individual Post Item Widget
 class PostItem extends StatelessWidget {
   final String username;
-  final String profilePicture;
   final String imageUrl;
   final String caption;
 
   const PostItem({
     super.key,
     required this.username,
-    required this.profilePicture,
     required this.imageUrl,
     required this.caption,
   });
@@ -68,55 +74,26 @@ class PostItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Post header with profile picture and username
+          // Post header with username
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(profilePicture),
+                const CircleAvatar(
+                  backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Placeholder
                 ),
                 const SizedBox(width: 10),
                 Text(username, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Spacer(),
-                const Icon(Icons.more_vert),
               ],
             ),
           ),
           // Post image
           Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity),
-          // Post actions (like, comment, share)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {},
-                ),
-                const SizedBox(width: 15),
-                IconButton(
-                  icon: const Icon(Icons.chat_bubble_outline),
-                  onPressed: () {},
-                ),
-                const SizedBox(width: 15),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {},
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.bookmark_border),
-                  onPressed: () {},
-                ),
-              ],
-            ),
-          ),
           // Post caption
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
-              '$username: $caption',
+              caption,
               style: const TextStyle(fontSize: 16),
             ),
           ),

@@ -27,15 +27,18 @@ Future<String?> uploadImageToFirebase(XFile imageFile) async {
 }
 
 // Function to create a Firestore document for the post
-Future<void> createPost(String imageUrl, String caption, String username) async {
+Future<void> createPost(String imageUrl, String caption, String username, String profilePicture, String userId) async {
   try {
     await FirebaseFirestore.instance.collection('posts').add({
       'imageUrl': imageUrl,
       'caption': caption,
       'username': username,
+      'profilePicture': profilePicture,
+      'userId': userId,
       'timestamp': FieldValue.serverTimestamp(),
     });
   } catch (e) {
     print('Failed to create post: $e');
   }
 }
+

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String initialUsername;
@@ -32,7 +34,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void _saveProfile() {
+  // Save profile data in Firestore
+  Future<void> _saveProfile() async {
     if (_usernameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Username cannot be empty.')),
@@ -40,15 +43,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
-    // Logic to save profile changes
-    Navigator.pop(context, {
-      'username': _usernameController.text, // Return username as a named value
-      'bio': _bioController.text, // Return bio as a named value
-    });
+    try {
+      // Get the current user's UID
+      User? user = FirebaseAuth.instance.currentUser;
+      String userUID = user!.uid;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile updated successfully!')),
-    );
+      // Update Firestore with the new username and bio
+      await FirebaseFirestore.instance.collection('users').doc(userUID).update({
+        'username': _usernameController.text.trim().toLowerCase(),
+        'bio': _bioController.text.trim(),
+      });
+
+      // Return the new values to update the UI
+      Navigator.pop(context, {
+        'username': _usernameController.text,
+        'bio': _bioController.text,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile: $e')),
+      );
+    }
   }
 
   @override
