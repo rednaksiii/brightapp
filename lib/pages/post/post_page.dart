@@ -47,37 +47,41 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
   }
 
   Future<void> _uploadAndPostImages() async {
-    if (_imageFileList == null || _imageFileList!.isEmpty) {
-      return;
-    }
+  if (_imageFileList == null || _imageFileList!.isEmpty) {
+    return;
+  }
 
-    setState(() {
-      _isUploading = true;
-    });
+  setState(() {
+    _isUploading = true;
+  });
 
-    String caption = _captionController.text; // Get the caption text
+  String caption = _captionController.text; // Get the caption text
+  User? user = FirebaseAuth.instance.currentUser;
+  String username = user?.displayName ?? 'Anonymous';
+  String profilePicture = user?.photoURL ?? 'https://via.placeholder.com/150';
+  String userId = user?.uid ?? 'unknown';
 
-    for (XFile imageFile in _imageFileList!) {
-      // Upload the image to Firebase
-      final imageUrl = await uploadImageToFirebase(imageFile);
-      
-      if (imageUrl != null) {
-        // Create a post in Firestore with the image URL and caption
-        await createPost(imageUrl, caption, FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous');
-      }
-    }
+  for (XFile imageFile in _imageFileList!) {
+    // Upload the image to Firebase
+    final imageUrl = await uploadImageToFirebase(imageFile);
 
-    setState(() {
-      _isUploading = false;
-      _imageFileList = null;
-      _captionController.clear(); // Clear the caption field after upload
-    });
-
-    // Navigate back to home after posting
-    if (mounted) {
-      Navigator.pop(context);
+    if (imageUrl != null) {
+      // Create a post in Firestore with the required fields
+      await createPost(userId, username, profilePicture, imageUrl, caption);
     }
   }
+
+  setState(() {
+    _isUploading = false;
+    _imageFileList = null;
+    _captionController.clear(); // Clear the caption field after upload
+  });
+
+  // Navigate back to home after posting
+  if (mounted) {
+    Navigator.pop(context);
+  }
+}
 
   @override
   void dispose() {
