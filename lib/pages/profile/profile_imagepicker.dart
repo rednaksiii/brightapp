@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileImagePickerPage extends StatefulWidget {
   const ProfileImagePickerPage({super.key});
@@ -40,7 +41,7 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
     }
   }
 
-  // Function to upload the image to Firebase Storage and update the user's profile image
+  // Function to upload the image to Firebase Storage and update Firestore
   Future<void> _uploadProfileImage() async {
     if (_imageFile == null) return;
 
@@ -61,18 +62,21 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
       final snapshot = await uploadTask.whenComplete(() => null);
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      // Update the user's profile with the new image URL
+      // Update the user's profile image URL in Firebase Auth and Firestore
       await user.updatePhotoURL(downloadUrl);
 
-      // Navigate back to profile page after updating the image
+      // Update Firestore with the new profile image URL
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'profileImageUrl': downloadUrl,
+      });
+
+      // Show a success message and navigate back
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile image updated successfully!')),
+        );
         Navigator.pop(context);
       }
-
-      // Optionally, show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile image updated successfully!')),
-      );
     } catch (e) {
       print("Error uploading image: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,24 +118,22 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
                   )
                 : Stack(
                     children: [
-                      // Display the selected image in full screen
                       Positioned.fill(
                         child: Image.file(
                           File(_imageFile!.path),
                           fit: BoxFit.cover,
                         ),
                       ),
-                      // Check button floating at the bottom-right corner
                       Positioned(
-                        bottom: 30, // Adjust based on your preference
-                        right: 30,  // Adjust based on your preference
+                        bottom: 30,
+                        right: 30,
                         child: FloatingActionButton(
                           onPressed: _uploadProfileImage,
-                          backgroundColor: Colors.white, // White color button
-                          child: const Icon(Icons.check, color: Colors.black), // Black icon
+                          backgroundColor: Colors.white,
+                          child: const Icon(Icons.check, color: Colors.black),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50), // Rounded shape
-                            side: const BorderSide(color: Colors.white, width: 2), // White border
+                            borderRadius: BorderRadius.circular(50),
+                            side: const BorderSide(color: Colors.white, width: 2),
                           ),
                         ),
                       ),
