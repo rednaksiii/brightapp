@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:brightapp/pages/user_profile/user_profile_page_logic.dart';
-import 'package:brightapp/pages/post_detail/post_detail_page.dart'; // Import PostDetailPage
+import 'package:brightapp/pages/post_detail/post_detail_page.dart';
 
 class UserProfilePageUI extends StatelessWidget {
   final String userId;
@@ -44,7 +44,6 @@ class UserProfilePageUI extends StatelessWidget {
                 style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
               const Divider(),
-              // Display user posts
               Expanded(
                 child: StreamBuilder<List<Map<String, dynamic>>>(
                   stream: userProfileLogic.getUserPosts(),

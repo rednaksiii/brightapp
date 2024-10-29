@@ -15,12 +15,11 @@ class UserProfilePageLogic {
     }
   }
 
-  // Stream to get user's posts
+  // Stream to get user's posts from the main 'posts' collection filtered by userId
   Stream<List<Map<String, dynamic>>> getUserPosts() {
     return FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('userPosts')
+        .collection('posts')
+        .where('userUID', isEqualTo: userId)  // Filter posts by userId
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
