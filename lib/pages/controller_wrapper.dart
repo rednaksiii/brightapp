@@ -1,5 +1,6 @@
 import 'package:brightapp/pages/home/home_page_ui.dart';
 import 'package:brightapp/pages/profile/profile_page_ui.dart';
+import 'package:brightapp/pages/search/search_page_ui.dart'; // Import the search page UI
 import 'package:flutter/material.dart';
 
 class ControllerWrapper extends StatefulWidget {
@@ -14,11 +15,11 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
 
   // Define pages using the new UI structure
   final List<Widget> _pages = [
-    const HomePageUI(),  // Updated HomePage to HomePageUI
-    const Center(child: Text('Search Page')),  // Placeholder for Search Page
+    const HomePageUI(),           // Home Page
+    const SearchPageUI(),          // Updated to show SearchPageUI
     const Center(child: Text('Post Page')),    // Placeholder for Post Page
     const Center(child: Text('Activity Page')), // Placeholder for Activity Page
-    const ProfilePageUI(),  // Updated ProfilePage to ProfilePageUI
+    const ProfilePageUI(),         // Profile Page
   ];
 
   void _onItemTapped(int index) async {

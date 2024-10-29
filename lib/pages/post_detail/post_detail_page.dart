@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import this to use Timestamp
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostDetailPage extends StatelessWidget {
-  final String imageUrl;
-  final String caption;
-  final Timestamp timestamp; // Use Firestore's Timestamp type
-  final String username;
+  final Map<String, dynamic> postData;
 
-  const PostDetailPage({
-    Key? key,
-    required this.imageUrl,
-    required this.caption,
-    required this.timestamp,
-    required this.username,
-  }) : super(key: key);
+  const PostDetailPage({Key? key, required this.postData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Convert the Firestore Timestamp to a DateTime
+    // Extract fields from the postData map
+    final String imageUrl = postData['imageUrl'];
+    final String caption = postData['caption'];
+    final Timestamp timestamp = postData['timestamp'];
+    final String username = postData['username'];
+
+    // Convert Firestore Timestamp to DateTime
     DateTime postDate = timestamp.toDate();
 
     return Scaffold(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:brightapp/pages/home/home_page_logic.dart';
+import 'package:brightapp/pages/user_profile/user_profile_page_ui.dart';
 
 class HomePageUI extends StatelessWidget {
   const HomePageUI({super.key});
@@ -8,47 +9,31 @@ class HomePageUI extends StatelessWidget {
   Widget build(BuildContext context) {
     final HomePageLogic homePageLogic = HomePageLogic();
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'BrightFeed',
-          style: TextStyle(color: Colors.black, fontSize: 24),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.send, color: Colors.black),
-            onPressed: () {
-              // Direct Messages button functionality to be implemented later
-            },
-          ),
-        ],
-      ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: homePageLogic.getPosts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No posts available"));
-          }
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: homePageLogic.getPosts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No posts available"));
+        }
 
-          final posts = snapshot.data!;
-          return ListView.builder(
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              final post = posts[index];
-              return PostItem(
-                username: post['username'] ?? 'Anonymous',
-                imageUrl: post['imageUrl'],
-                caption: post['caption'],
-              );
-            },
-          );
-        },
-      ),
+        final posts = snapshot.data!;
+        return ListView.builder(
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final post = posts[index];
+            return PostItem(
+              username: post['username'] ?? 'Anonymous',
+              profilePicture: post['profilePicture'] ?? 'https://via.placeholder.com/150',
+              imageUrl: post['imageUrl'],
+              caption: post['caption'],
+              userId: post['userId'],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -56,14 +41,18 @@ class HomePageUI extends StatelessWidget {
 // Individual Post Item Widget
 class PostItem extends StatelessWidget {
   final String username;
+  final String profilePicture;
   final String imageUrl;
   final String caption;
+  final String userId;
 
   const PostItem({
     super.key,
     required this.username,
+    required this.profilePicture,
     required this.imageUrl,
     required this.caption,
+    required this.userId,
   });
 
   @override
@@ -74,13 +63,23 @@ class PostItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Post header with username
+          // Post header with profile picture and username
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                const CircleAvatar(
-                  backgroundImage: NetworkImage('https://via.placeholder.com/150'), // Placeholder
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserProfilePageUI(userId: userId),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(profilePicture),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text(username, style: const TextStyle(fontWeight: FontWeight.bold)),
