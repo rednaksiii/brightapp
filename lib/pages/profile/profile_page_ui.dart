@@ -131,8 +131,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                 ? (_profileImageUrl!.startsWith('http')
                   ? NetworkImage(_profileImageUrl!)
                   : FileImage(File(_profileImageUrl!)) as ImageProvider)
-                : const AssetImage('assets/images/profile_picture.png'),
-              onBackgroundImageError: (_, __) => const AssetImage('assets/images/profile_picture.png'), // Fallback if URL is invalid
+                : const AssetImage('https://via.placeholder.com/150'),
+              onBackgroundImageError: (_, __) => const AssetImage('https://via.placeholder.com/150'), // Fallback if URL is invalid
             ),
           ),
           const SizedBox(height: 20),
