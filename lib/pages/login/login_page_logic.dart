@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:brightapp/controllers/auth_controller.dart';
 
-class LoginPageLogic {
+class LoginPageLogic extends ChangeNotifier {
+  // ChangeNotifier
   bool isLoading = false;
   String? errorMessage;
 
@@ -12,6 +13,7 @@ class LoginPageLogic {
       BuildContext context, String email, String password) async {
     isLoading = true;
     errorMessage = null;
+    notifyListeners();
 
     try {
       // Attempt to sign in
@@ -35,12 +37,58 @@ class LoginPageLogic {
       print('Unexpected error: $e'); // Print the exact error
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loginWithEmailOrUsername(
+      BuildContext context, String emailOrUsername, String password) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      // try to login if it's email formatted
+      final emailRegex =
+          RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+      if (emailRegex.hasMatch(emailOrUsername)) {
+        await login(context, emailOrUsername, password);
+      } else {
+        // if it's username, try to find corresponding email from firebase
+        final userQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .where('username', isEqualTo: emailOrUsername)
+            .limit(1)
+            .get();
+
+        if (userQuery.docs.isEmpty) {
+          errorMessage = 'No username found';
+          notifyListeners();
+          return;
+        }
+
+        // bring email correspoding to username
+        final email = userQuery.docs.first['email'];
+
+        // login with email and password
+        await login(context, email, password);
+      }
+    } on FirebaseAuthException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = 'An unexpected error occurred.';
+      notifyListeners();
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> signInWithFacebook(BuildContext context) async {
     isLoading = true;
     errorMessage = null;
+    notifyListeners();
 
     try {
       // Use the fb login provided by auth_controller.dart
@@ -52,14 +100,17 @@ class LoginPageLogic {
     } catch (e) {
       errorMessage = e.toString();
       print('Facebook Login Error: $e');
+      notifyListeners();
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> signInWithGoogle(BuildContext context) async {
     isLoading = true;
     errorMessage = null;
+    notifyListeners();
 
     try {
       // Use the google login provided by auth_controller.dart
@@ -72,14 +123,17 @@ class LoginPageLogic {
     } catch (e) {
       errorMessage = e.toString();
       print('Google Login Error: $e');
+      notifyListeners();
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> resetPassword(BuildContext context, String email) async {
     if (email.isEmpty) {
       errorMessage = 'Please enter your email to reset password.';
+      notifyListeners();
       return;
     }
 
@@ -90,8 +144,10 @@ class LoginPageLogic {
       );
     } on FirebaseAuthException catch (e) {
       errorMessage = e.message;
+      notifyListeners();
     } catch (e) {
       errorMessage = 'An unexpected error occurred.';
+      notifyListeners();
     }
   }
 }
