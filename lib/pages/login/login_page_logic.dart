@@ -1,64 +1,97 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:brightapp/controllers/auth_controller.dart';
 
 class LoginPageLogic {
-  final BuildContext context;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool isLoading = false;
+  String? errorMessage;
 
-  final TextEditingController usernameOrEmailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  Future<void> login(
+      BuildContext context, String email, String password) async {
+    isLoading = true;
+    errorMessage = null;
 
-  String errorMessage = '';
+    try {
+      // Attempt to sign in
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-  LoginPageLogic(this.context);
+      // Print the returned UserCredential for debugging
+      print('UserCredential: $userCredential');
+      print('User: ${userCredential.user}'); // Print the user details
 
-  // Login method that checks whether the user input is email or username
-  Future<void> login() async {
-    String input = usernameOrEmailController.text.trim();
-    String email = input;
+      // Navigate to the home page on success
+      Navigator.of(context).pushReplacementNamed('/home');
+    } on FirebaseAuthException catch (e) {
+      errorMessage = e.message;
+      print('FirebaseAuthException: ${e.message}');
+    } catch (e) {
+      errorMessage = 'An unexpected error occurred.';
+      print('Unexpected error: $e'); // Print the exact error
+    } finally {
+      isLoading = false;
+    }
+  }
 
-    if (!input.contains('@')) {
-      // If input is not an email, assume it's a username
-      try {
-        QuerySnapshot query = await _firestore
-            .collection('users')
-            .where('username', isEqualTo: input.toLowerCase())
-            .limit(1)
-            .get();
+  Future<void> signInWithFacebook(BuildContext context) async {
+    isLoading = true;
+    errorMessage = null;
 
-        if (query.docs.isNotEmpty) {
-          email = query.docs.first['email'];
-        } else {
-          throw FirebaseAuthException(
-              code: 'user-not-found', message: 'Username not found');
-        }
-      } catch (e) {
-        errorMessage = 'Failed to find username: $e';
-        return;
-      }
+    try {
+      // Use the fb login provided by auth_controller.dart
+      final authController =
+          Provider.of<AuthController>(context, listen: false);
+      await authController.signInWithFacebook();
+
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      errorMessage = e.toString();
+      print('Facebook Login Error: $e');
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  Future<void> signInWithGoogle(BuildContext context) async {
+    isLoading = true;
+    errorMessage = null;
+
+    try {
+      // Use the google login provided by auth_controller.dart
+      final authController =
+          Provider.of<AuthController>(context, listen: false);
+      await authController.signInWithGoogle();
+
+      // return homepage when login succeed
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      errorMessage = e.toString();
+      print('Google Login Error: $e');
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  Future<void> resetPassword(BuildContext context, String email) async {
+    if (email.isEmpty) {
+      errorMessage = 'Please enter your email to reset password.';
+      return;
     }
 
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: passwordController.text.trim(),
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent.')),
       );
-      Navigator.of(context).pushReplacementNamed('/home');
     } on FirebaseAuthException catch (e) {
-      errorMessage = e.message ?? 'An error occurred';
+      errorMessage = e.message;
+    } catch (e) {
+      errorMessage = 'An unexpected error occurred.';
     }
-  }
-
-  // Navigate to register page
-  void navigateToRegister() {
-    Navigator.of(context).pushReplacementNamed('/register');
-  }
-
-  // Dispose controllers
-  void dispose() {
-    usernameOrEmailController.dispose();
-    passwordController.dispose();
   }
 }
