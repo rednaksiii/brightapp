@@ -19,6 +19,8 @@ class RegisterPageLogic {
   // Constructor to initialize context
   RegisterPageLogic(this.context);
 
+  get confirmPasswordController => null;
+
   // Method to validate the username
   void validateUsername(String username) {
     if (username != username.toLowerCase()) {
@@ -32,16 +34,17 @@ class RegisterPageLogic {
   Future<void> register() async {
     if (errorMessage.isNotEmpty) {
       // Show error if the username is not valid
-       Text(
+      Text(
         errorMessage,
         style: TextStyle(color: Colors.red),
-       );
+      );
       return;
     }
 
     try {
       // Create user with email and password
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -51,14 +54,18 @@ class RegisterPageLogic {
       String userUID = user!.uid;
 
       // Update Firebase Auth display name
-      await user.updateDisplayName(usernameController.text.trim().toLowerCase());
+      await user
+          .updateDisplayName(usernameController.text.trim().toLowerCase());
 
       // Save user data to Firestore
       await FirebaseFirestore.instance.collection('users').doc(userUID).set({
         'email': emailController.text.trim(),
-        'username': usernameController.text.trim().toLowerCase(),  // Ensure username is saved in lowercase
-        'profileImageUrl': '',  // Empty by default until the user uploads a picture
-        'userUID': userUID,  // UID from Firebase Authentication
+        'username': usernameController.text
+            .trim()
+            .toLowerCase(), // Ensure username is saved in lowercase
+        'profileImageUrl':
+            '', // Empty by default until the user uploads a picture
+        'userUID': userUID, // UID from Firebase Authentication
       });
 
       // Navigate to the home page after successful registration
