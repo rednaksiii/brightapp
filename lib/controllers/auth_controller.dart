@@ -1,4 +1,3 @@
-// lib/controllers/auth_controller.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -15,6 +14,17 @@ class AuthController extends ChangeNotifier {
       this.user = user;
       notifyListeners();
     });
+    _initializeUser();
+  }
+
+  Future<void> _initializeUser() async {
+    user = _auth.currentUser;
+    notifyListeners();
+  }
+
+  // Check if the user is logged in based on Firebase user
+  bool isUserLoggedIn() {
+    return user != null;
   }
 
   Future<void> signInWithEmail(String email, String password) async {
@@ -53,39 +63,38 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// Facebook login
+  // Facebook login
   Future<void> signInWithFacebook() async {
-    try {
-      final LoginResult result = await _facebookAuth.login();
+    print('signInWithFacebook method called');
+    final LoginResult result = await _facebookAuth.login();
 
-      if (result.status == LoginStatus.success) {
-        final AccessToken accessToken = result.accessToken!;
-        final OAuthCredential credential =
-            FacebookAuthProvider.credential(accessToken.tokenString);
+    print('Facebook login status: ${result.status}');
+    print('Facebook login message: ${result.message}');
 
-        await _auth.signInWithCredential(credential);
-      } else if (result.status == LoginStatus.cancelled) {
-        throw Exception('Facebook login cancelled');
-      } else {
-        throw Exception(result.message ?? 'unexpected error.');
-      }
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message ?? 'unexpected error.');
-    } catch (e) {
-      throw Exception('An error occurred while signing in.');
+    if (result.status == LoginStatus.success) {
+      final AccessToken accessToken = result.accessToken!;
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken.tokenString);
+
+      await _auth.signInWithCredential(credential);
+    } else if (result.status == LoginStatus.cancelled) {
+      throw Exception('Facebook login cancelled');
+    } else {
+      throw Exception(
+          result.message ?? 'Unexpected error during Facebook login.');
     }
   }
 
-  // logout
+  // Logout
   Future<void> signOut() async {
     try {
       await _auth.signOut();
       await _googleSignIn.signOut();
       await _facebookAuth.logOut();
+      user = null;
+      notifyListeners();
     } catch (e) {
       throw 'An error occurred while signing out.';
     }
   }
-
-  // Additional authentication methods can be added here
 }
