@@ -8,7 +8,8 @@ import 'package:brightapp/pages/post/post_page.dart';
 final Map<String, WidgetBuilder> routes = {
   '/login': (context) => const LoginPageUI(),
   '/register': (context) => const RegisterPageUI(),
-  '/home': (context) => const ControllerWrapper(),  // Set ControllerWrapper as the main home
+  '/home': (context) =>
+      const ControllerWrapper(), // Set ControllerWrapper as the main home
   '/post': (context) => const ImagePickerPage(),
-  '/profile': (context) => const ProfilePageUI(),     // Updated ProfilePage
+  '/profile': (context) => const ProfilePageUI(), // Updated ProfilePage
 };
