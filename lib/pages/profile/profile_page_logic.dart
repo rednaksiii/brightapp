@@ -53,7 +53,11 @@ class ProfilePageLogic {
 
   // Function to listen to updates in follower and following count
   void listenToFollowerFollowingUpdates() {
-    FirebaseFirestore.instance.collection('users').doc(userId).snapshots().listen((snapshot) {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .snapshots()
+        .listen((snapshot) {
       if (snapshot.exists) {
         followersCount = snapshot.get('followers') ?? 0;
         followingCount = snapshot.get('following') ?? 0;
