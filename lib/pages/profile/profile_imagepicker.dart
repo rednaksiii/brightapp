@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileImagePickerPage extends StatefulWidget {
   const ProfileImagePickerPage({super.key});
@@ -40,51 +41,58 @@ class _ProfileImagePickerPageState extends State<ProfileImagePickerPage> {
     }
   }
 
-  // Function to upload the image to Firebase Storage and update the user's profile image
-  Future<void> _uploadProfileImage() async {
-    if (_imageFile == null) return;
+// Function to upload the image to Firebase Storage and update the user's profile image
+Future<void> _uploadProfileImage() async {
+  if (_imageFile == null) return;
 
-    setState(() {
-      _isUploading = true;
+  setState(() {
+    _isUploading = true;
+  });
+
+  try {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('profile_images')
+        .child('${user.uid}.jpg');
+
+    final uploadTask = storageRef.putFile(File(_imageFile!.path));
+    final snapshot = await uploadTask.whenComplete(() => null);
+    final downloadUrl = await snapshot.ref.getDownloadURL();
+
+    // Update Firebase Auth profile with the new image URL
+    await user.updatePhotoURL(downloadUrl);
+    await user.reload();
+
+    // Store the download URL in the Firestore user's document
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'profileImageUrl': downloadUrl,
     });
 
-    try {
-      final User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_images')
-          .child('${user.uid}.jpg'); // Store the image with user's UID
-
-      final uploadTask = storageRef.putFile(File(_imageFile!.path));
-      final snapshot = await uploadTask.whenComplete(() => null);
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-
-      // Update the user's profile with the new image URL
-      await user.updatePhotoURL(downloadUrl);
-
-      // Navigate back to profile page after updating the image
-      if (mounted) {
-        Navigator.pop(context);
-      }
-
-      // Optionally, show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile image updated successfully!')),
-      );
-    } catch (e) {
-      print("Error uploading image: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to upload profile image.')),
-      );
-    } finally {
-      setState(() {
-        _isUploading = false;
-        _imageFile = null; // Clear the selected image after uploading
-      });
+    // Pass the download URL back to ProfilePageUI
+    if (mounted) {
+      Navigator.pop(context, downloadUrl);
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile image updated successfully!')),
+    );
+  } catch (e) {
+    print("Error uploading image: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Failed to upload profile image.')),
+    );
+  } finally {
+    setState(() {
+      _isUploading = false;
+      _imageFile = null;
+    });
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {

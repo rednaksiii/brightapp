@@ -1,39 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:brightapp/pages/home/home_page_logic.dart';
+import 'package:brightapp/controllers/firebase_services.dart';
 import 'package:brightapp/pages/user_profile/user_profile_page_ui.dart';
 
-class HomePageUI extends StatelessWidget {
+class HomePageUI extends StatefulWidget {
   const HomePageUI({super.key});
 
   @override
+  _HomePageUIState createState() => _HomePageUIState();
+}
+
+class _HomePageUIState extends State<HomePageUI> {
+  List<Map<String, dynamic>> randomPosts = [];
+  bool isLoading = false;
+
+  // Fetch multiple random posts
+  Future<void> fetchRandomPostsData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    randomPosts = await fetchRandomPosts(6); // Fetch 5-6 posts
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRandomPostsData(); // Fetch posts on initialization
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final HomePageLogic homePageLogic = HomePageLogic();
-
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: homePageLogic.getPosts(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No posts available"));
-        }
-
-        final posts = snapshot.data!;
-        return ListView.builder(
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final post = posts[index];
-            return PostItem(
-              username: post['username'] ?? 'Anonymous',
-              profilePicture: post['profilePicture'] ?? 'https://via.placeholder.com/150',
-              imageUrl: post['imageUrl'],
-              caption: post['caption'],
-              userId: post['userId'],
-            );
-          },
-        );
-      },
+    return Scaffold(
+      body: Center(
+        child: isLoading
+            ? const CircularProgressIndicator()
+            : randomPosts.isNotEmpty
+                ? ListView.builder(
+                    itemCount: randomPosts.length,
+                    itemBuilder: (context, index) {
+                      final post = randomPosts[index];
+                      return PostItem(
+                        username: post['username'] ?? 'Anonymous',
+                        profilePicture: post['profilePicture'] ?? 'https://via.placeholder.com/150',
+                        imageUrl: post['imageUrl'] ?? 'https://via.placeholder.com/300', // Handle null imageUrl
+                        caption: post['caption'] ?? '',
+                        userId: post['userId'] ?? 'unknown',
+                      );
+                    },
+                  )
+                : const Center(child: Text("No posts available")),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: fetchRandomPostsData, // Refreshes the feed
+        child: const Icon(Icons.refresh),
+      ),
     );
   }
 }

@@ -32,6 +32,10 @@ class RegisterPageLogic {
   Future<void> register() async {
     if (errorMessage.isNotEmpty) {
       // Show error if the username is not valid
+       Text(
+        errorMessage,
+        style: TextStyle(color: Colors.red),
+       );
       return;
     }
 
@@ -45,6 +49,9 @@ class RegisterPageLogic {
       // Get the user's UID and prepare to save additional data
       User? user = userCredential.user;
       String userUID = user!.uid;
+
+      // Update Firebase Auth display name
+      await user.updateDisplayName(usernameController.text.trim().toLowerCase());
 
       // Save user data to Firestore
       await FirebaseFirestore.instance.collection('users').doc(userUID).set({

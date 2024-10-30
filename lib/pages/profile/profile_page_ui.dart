@@ -35,9 +35,11 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
       profileLogic.userName = prefs.getString('username') ?? 'Default Username';
       profileLogic.userBio = prefs.getString('bio') ?? 'Default Bio';
       String? profileImageUrl = prefs.getString('profileImageUrl');
-      if (profileImageUrl != null) {
-        _profileImageUrl = profileImageUrl;
-      }
+
+       // Set _profileImageUrl from FirebaseAuth photoURL if available
+      final userPhotoURL = FirebaseAuth.instance.currentUser?.photoURL;
+      _profileImageUrl = userPhotoURL ?? profileImageUrl;
+
       List<String>? postImagePaths = prefs.getStringList('postImages');
       if (postImagePaths != null) {
         _postImages = postImagePaths.map((path) => File(path)).toList();
@@ -114,20 +116,23 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                 MaterialPageRoute(
                   builder: (context) => const ProfileImagePickerPage(),
                 ),
-              ).then((result) {
-                if (result != null) {
+              ).then((downloadUrl) {
+                if (downloadUrl != null) {
                   setState(() {
-                    _profileImage = File(result);
+                    _profileImageUrl = downloadUrl;
                   });
-                  _saveProfileData(profileLogic.userName, profileLogic.userBio, result);
+                  _saveProfileData(profileLogic.userName, profileLogic.userBio, downloadUrl);
                 }
               });
             },
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: _profileImage != null
+              backgroundImage: _profileImageUrl != null
+                ? (_profileImageUrl!.startsWith('http')
                   ? NetworkImage(_profileImageUrl!)
-                  : const AssetImage('assets/images/profile_picture.png'),
+                  : FileImage(File(_profileImageUrl!)) as ImageProvider)
+                : const AssetImage('assets/images/profile_picture.png'),
+              onBackgroundImageError: (_, __) => const AssetImage('assets/images/profile_picture.png'), // Fallback if URL is invalid
             ),
           ),
           const SizedBox(height: 20),
