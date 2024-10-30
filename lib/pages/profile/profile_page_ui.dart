@@ -36,7 +36,7 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
       profileLogic.userBio = prefs.getString('bio') ?? 'Default Bio';
       String? profileImageUrl = prefs.getString('profileImageUrl');
 
-       // Set _profileImageUrl from FirebaseAuth photoURL if available
+      // Set _profileImageUrl from FirebaseAuth photoURL if available
       final userPhotoURL = FirebaseAuth.instance.currentUser?.photoURL;
       _profileImageUrl = userPhotoURL ?? profileImageUrl;
 
@@ -47,7 +47,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
     });
   }
 
-  Future<void> _saveProfileData(String username, String bio, String? imagePath) async {
+  Future<void> _saveProfileData(
+      String username, String bio, String? imagePath) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', username);
     await prefs.setString('bio', bio);
@@ -69,7 +70,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
       setState(() {
         _postImages.add(File(image.path));
       });
-      await _saveProfileData(profileLogic.userName, profileLogic.userBio, _profileImage?.path);
+      await _saveProfileData(
+          profileLogic.userName, profileLogic.userBio, _profileImage?.path);
     }
   }
 
@@ -96,8 +98,14 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
       setState(() {
         _postImages.removeAt(index);
       });
-      await _saveProfileData(profileLogic.userName, profileLogic.userBio, _profileImage?.path);
+      await _saveProfileData(
+          profileLogic.userName, profileLogic.userBio, _profileImage?.path);
     }
+  }
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -121,18 +129,20 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                   setState(() {
                     _profileImageUrl = downloadUrl;
                   });
-                  _saveProfileData(profileLogic.userName, profileLogic.userBio, downloadUrl);
+                  _saveProfileData(
+                      profileLogic.userName, profileLogic.userBio, downloadUrl);
                 }
               });
             },
             child: CircleAvatar(
               radius: 50,
               backgroundImage: _profileImageUrl != null
-                ? (_profileImageUrl!.startsWith('http')
-                  ? NetworkImage(_profileImageUrl!)
-                  : FileImage(File(_profileImageUrl!)) as ImageProvider)
-                : const AssetImage('https://via.placeholder.com/150'),
-              onBackgroundImageError: (_, __) => const AssetImage('https://via.placeholder.com/150'), // Fallback if URL is invalid
+                  ? (_profileImageUrl!.startsWith('http')
+                      ? NetworkImage(_profileImageUrl!)
+                      : FileImage(File(_profileImageUrl!)) as ImageProvider)
+                  : const AssetImage('https://via.placeholder.com/150'),
+              onBackgroundImageError: (_, __) => const AssetImage(
+                  'https://via.placeholder.com/150'), // Fallback if URL is invalid
             ),
           ),
           const SizedBox(height: 20),
@@ -143,7 +153,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
               children: [
                 Text(
                   profileLogic.userName,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -153,6 +164,7 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
               ],
             ),
           ),
+
           const SizedBox(height: 20),
           // Centralized Follower and Following Counts
           Padding(
@@ -164,7 +176,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                   children: [
                     Text(
                       '${profileLogic.followersCount}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const Text('Followers'),
                   ],
@@ -174,7 +187,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                   children: [
                     Text(
                       '${profileLogic.followingCount}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const Text('Following'),
                   ],
@@ -203,7 +217,8 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                         profileLogic.userName = result['username'];
                         profileLogic.userBio = result['bio'];
                       });
-                      _saveProfileData(result['username'], result['bio'], _profileImage?.path);
+                      _saveProfileData(result['username'], result['bio'],
+                          _profileImage?.path);
                     }
                   });
                 },
@@ -219,6 +234,18 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
               child: OutlinedButton(
                 onPressed: _pickPostImage,
                 child: const Text('Add Post Image'),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _logout,
+                child: const Text('Log Out'),
               ),
             ),
           ),
