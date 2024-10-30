@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="facebook_app_id">1656839541545885</string>
+    <string name="fb_login_protocol_scheme">fb1656839541545885</string>
+    <string name="facebook_client_token">d5c43a50f6ff815ee23d7e03bef28b5f</string>
+    <string name="app_name">brightapp</string>
+</resources>
+
