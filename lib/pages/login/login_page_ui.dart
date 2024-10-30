@@ -10,7 +10,8 @@ class LoginPageUI extends StatefulWidget {
 
 class _LoginPageUIState extends State<LoginPageUI> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _emailOrUsernameController =
+      TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   final LoginPageLogic _loginLogic = LoginPageLogic();
@@ -18,10 +19,10 @@ class _LoginPageUIState extends State<LoginPageUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDEEDC), // Soft beige background
+      backgroundColor: const Color(0xFFFDEEDC),
       appBar: AppBar(
         title: const Text('Bright - Login'),
-        backgroundColor: const Color(0xFFFFB085), // Sunset orange for AppBar
+        backgroundColor: const Color(0xFFFFB085),
         elevation: 0,
       ),
       body: Center(
@@ -34,10 +35,11 @@ class _LoginPageUIState extends State<LoginPageUI> {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFFFB085), // Sunset orange for title
+                  color: Color(0xFFFFB085),
                 ),
               ),
               const SizedBox(height: 20),
+              // Error Message Display
               if (_loginLogic.errorMessage != null)
                 Container(
                   padding: const EdgeInsets.all(8.0),
@@ -60,13 +62,12 @@ class _LoginPageUIState extends State<LoginPageUI> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Email Field
+                    // Email or Username Field
                     TextFormField(
-                      controller: _emailController,
+                      controller: _emailOrUsernameController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
-                        labelStyle: const TextStyle(
-                            color: Color(0xFF7A92A1)), // Soft blue-gray
+                        labelText: 'Email or Username',
+                        labelStyle: const TextStyle(color: Color(0xFF7A92A1)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide:
@@ -78,12 +79,14 @@ class _LoginPageUIState extends State<LoginPageUI> {
                               const BorderSide(color: Color(0xFFFFB085)),
                         ),
                       ),
-                      keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null ||
-                            value.isEmpty ||
-                            !value.contains('@')) {
-                          return 'Please enter a valid email.';
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a valid email or username.';
+                        }
+                        final emailRegex = RegExp(
+                            r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+                        if (!emailRegex.hasMatch(value) && value.length < 3) {
+                          return 'Please enter a valid email or username.';
                         }
                         return null;
                       },
@@ -121,19 +124,20 @@ class _LoginPageUIState extends State<LoginPageUI> {
                       child: ElevatedButton(
                         onPressed: _loginLogic.isLoading
                             ? null
-                            : () {
+                            : () async {
                                 if (_formKey.currentState!.validate()) {
-                                  _loginLogic.login(
+                                  // Attempt login and refresh UI to show error if it fails
+                                  await _loginLogic.loginWithEmailOrUsername(
                                     context,
-                                    _emailController.text.trim(),
+                                    _emailOrUsernameController.text.trim(),
                                     _passwordController.text.trim(),
                                   );
-                                  setState(() {});
+                                  setState(
+                                      () {}); // Update UI state to show error if login fails
                                 }
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color(0xFFFFB085), // Sunset orange
+                          backgroundColor: const Color(0xFFFFB085),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -141,8 +145,7 @@ class _LoginPageUIState extends State<LoginPageUI> {
                         ),
                         child: _loginLogic.isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
+                                color: Colors.white)
                             : const Text(
                                 'Login',
                                 style: TextStyle(
@@ -158,14 +161,14 @@ class _LoginPageUIState extends State<LoginPageUI> {
                           : () {
                               _loginLogic.resetPassword(
                                 context,
-                                _emailController.text.trim(),
+                                _emailOrUsernameController.text.trim(),
                               );
                               setState(() {});
                             },
                       child: const Text(
                         'Forgot Password?',
                         style: TextStyle(
-                          color: Color(0xFF7A92A1), // Soft blue-gray
+                          color: Color(0xFF7A92A1),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -177,8 +180,7 @@ class _LoginPageUIState extends State<LoginPageUI> {
                       children: [
                         const Text(
                           "Don't have an account?",
-                          style: TextStyle(
-                              color: Color(0xFF7A92A1)), // Soft blue-gray
+                          style: TextStyle(color: Color(0xFF7A92A1)),
                         ),
                         TextButton(
                           onPressed: _loginLogic.isLoading
@@ -190,7 +192,7 @@ class _LoginPageUIState extends State<LoginPageUI> {
                           child: const Text(
                             'Register',
                             style: TextStyle(
-                              color: Color(0xFFFFB085), // Sunset orange
+                              color: Color(0xFFFFB085),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
