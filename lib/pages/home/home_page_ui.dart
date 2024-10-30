@@ -45,8 +45,10 @@ class _HomePageUIState extends State<HomePageUI> {
                       final post = randomPosts[index];
                       return PostItem(
                         username: post['username'] ?? 'Anonymous',
-                        profilePicture: post['profilePicture'] ?? 'https://via.placeholder.com/150',
-                        imageUrl: post['imageUrl'] ?? 'https://via.placeholder.com/300', // Handle null imageUrl
+                        profilePicture: post['profilePicture'] ??
+                            'https://via.placeholder.com/150',
+                        imageUrl: post['imageUrl'] ??
+                            'https://via.placeholder.com/300', // Handle null imageUrl
                         caption: post['caption'] ?? '',
                         userId: post['userId'] ?? 'unknown',
                       );
@@ -106,7 +108,8 @@ class PostItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(username, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(username,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
