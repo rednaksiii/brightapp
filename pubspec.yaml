@@ -40,7 +40,7 @@ flutter:
     - assets/images/app_icon.png
     - assets/images/google.png
     - assets/images/facebook.png
-
+    
 # Configuration for flutter_launcher_icons
 flutter_icons:
   android: true    # Enable custom icons for Android

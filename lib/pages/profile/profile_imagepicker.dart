@@ -92,8 +92,6 @@ Future<void> _uploadProfileImage() async {
   }
 }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,24 +120,22 @@ Future<void> _uploadProfileImage() async {
                   )
                 : Stack(
                     children: [
-                      // Display the selected image in full screen
                       Positioned.fill(
                         child: Image.file(
                           File(_imageFile!.path),
                           fit: BoxFit.cover,
                         ),
                       ),
-                      // Check button floating at the bottom-right corner
                       Positioned(
-                        bottom: 30, // Adjust based on your preference
-                        right: 30,  // Adjust based on your preference
+                        bottom: 30,
+                        right: 30,
                         child: FloatingActionButton(
                           onPressed: _uploadProfileImage,
-                          backgroundColor: Colors.white, // White color button
-                          child: const Icon(Icons.check, color: Colors.black), // Black icon
+                          backgroundColor: Colors.white,
+                          child: const Icon(Icons.check, color: Colors.black),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50), // Rounded shape
-                            side: const BorderSide(color: Colors.white, width: 2), // White border
+                            borderRadius: BorderRadius.circular(50),
+                            side: const BorderSide(color: Colors.white, width: 2),
                           ),
                         ),
                       ),

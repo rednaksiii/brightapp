@@ -47,6 +47,7 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
         });
       }
     } catch (e) {
+      print("Image picking error: $e");
       setState(() {
         _pickImageError = e;
       });
@@ -97,9 +98,9 @@ Future<void> _applyFilter(int index) async {
 Future<void> _uploadAndPostImages() async {
   if (_editedImageFiles == null || _editedImageFiles!.isEmpty) return;
 
-  setState(() {
-    _isUploading = true;
-  });
+    setState(() {
+      _isUploading = true;
+    });
 
   String caption = _captionController.text;
   User? user = FirebaseAuth.instance.currentUser;
