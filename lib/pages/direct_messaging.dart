@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'chat_screen.dart'; // Import the chat screen
+import 'chat_screen.dart';
 
 class MessagingPage extends StatelessWidget {
   @override
@@ -20,7 +20,7 @@ class MessagingPage extends StatelessWidget {
             itemBuilder: (context, index) {
               var chat = chats[index];
               return ListTile(
-                title: Text(chat.id), // Display chat ID or user name
+                title: Text(chat.id), 
                 onTap: () {
                   Navigator.push(
                     context,
@@ -36,7 +36,7 @@ class MessagingPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Here you can create a new chat or handle additional functionality
+
         },
         child: Icon(Icons.message),
       ),
