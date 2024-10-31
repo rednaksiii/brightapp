@@ -10,10 +10,10 @@ class RegisterPageUI extends StatelessWidget {
     final RegisterPageLogic registerLogic = RegisterPageLogic(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDEEDC), // Light beige background
+      backgroundColor: const Color(0xFFFDEEDC),
       appBar: AppBar(
         title: const Text('Register'),
-        backgroundColor: const Color(0xFFFFB085), // Sunset orange for AppBar
+        backgroundColor: const Color(0xFFFFB085),
         elevation: 0,
       ),
       body: Padding(
@@ -21,23 +21,39 @@ class RegisterPageUI extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Title
             const Text(
               'Create Your Account',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFFB085), // Sunset orange
+                color: Color(0xFFFFB085),
               ),
             ),
             const SizedBox(height: 20),
+            // Username TextField
+            TextField(
+              controller: registerLogic.usernameController,
+              decoration: InputDecoration(
+                labelText: 'Username',
+                labelStyle: const TextStyle(color: Color(0xFF7A92A1)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFF7A92A1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFFFB085)),
+                ),
+              ),
+              onChanged: (value) => registerLogic.validateUsername(value),
+            ),
+            const SizedBox(height: 16),
             // Email TextField
             TextField(
               controller: registerLogic.emailController,
               decoration: InputDecoration(
                 labelText: 'Email',
-                labelStyle:
-                    const TextStyle(color: Color(0xFF7A92A1)), // Soft blue-gray
+                labelStyle: const TextStyle(color: Color(0xFF7A92A1)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: const BorderSide(color: Color(0xFF7A92A1)),
@@ -92,7 +108,7 @@ class RegisterPageUI extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: registerLogic.register,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFB085), // Sunset orange
+                  backgroundColor: const Color(0xFFFFB085),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -114,19 +130,17 @@ class RegisterPageUI extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 16),
-            // Navigate to Login Page
             TextButton(
               onPressed: registerLogic.navigateToLogin,
               child: const Text(
                 'Already have an account? Login',
                 style: TextStyle(
-                  color: Color(0xFF7A92A1), // Soft blue-gray
+                  color: Color(0xFF7A92A1),
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
             const SizedBox(height: 25),
-            // Divider with "Or continue with" text
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Row(
@@ -156,11 +170,9 @@ class RegisterPageUI extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-            // Google and Facebook sign-in buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Google Sign-In Button
                 SquareTile(
                   imagePath: 'assets/images/google.png',
                   onTap: () async {
@@ -173,7 +185,6 @@ class RegisterPageUI extends StatelessWidget {
                   },
                 ),
                 const SizedBox(width: 15),
-                // Facebook Sign-In Button
                 SquareTile(
                   imagePath: 'assets/images/facebook.png',
                   onTap: () async {
