@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'chat_screen.dart';
 
 class MessagingPage extends StatelessWidget {
   @override
