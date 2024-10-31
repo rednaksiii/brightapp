@@ -31,7 +31,9 @@ class UserProfilePageUI extends StatelessWidget {
               const SizedBox(height: 20),
               CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(userData['profileImageUrl'] ?? 'https://via.placeholder.com/150'),
+                backgroundImage: userData['profileImageUrl'] != null && userData['profileImageUrl'].isNotEmpty
+                    ? NetworkImage(userData['profileImageUrl'])
+                    : const NetworkImage('https://via.placeholder.com/150'),
               ),
               const SizedBox(height: 20),
               Text(
