@@ -18,38 +18,95 @@ class PostDetailPage extends StatelessWidget {
     DateTime postDate = timestamp.toDate();
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Post Details'),
+        backgroundColor: Colors.black,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Display the full image
-            Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity),
-            const SizedBox(height: 10),
-            // Display the caption
-            Text(
-              caption,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            // Display the username and timestamp
-            Row(
-              children: [
-                Text(
-                  'Posted by: $username',
-                  style: const TextStyle(fontSize: 14, color: Colors.black54),
+      body: Center(
+        child: GestureDetector(
+          onTap: () {
+            // Allow users to tap on the image for a fullscreen effect
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FullscreenImagePage(imageUrl: imageUrl),
+              ),
+            );
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  width: double.infinity,
                 ),
-                const Spacer(),
-                Text(
-                  'Posted on: ${postDate.toLocal()}',
-                  style: const TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Display the caption
+                    Text(
+                      caption,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Display the username and timestamp
+                    Row(
+                      children: [
+                        Text(
+                          'Posted by: $username',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Posted on: ${postDate.toLocal()}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FullscreenImagePage extends StatelessWidget {
+  final String imageUrl;
+
+  const FullscreenImagePage({Key? key, required this.imageUrl}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => Navigator.pop(context), // Dismiss fullscreen on tap
+        child: Center(
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+            width: double.infinity,
+          ),
         ),
       ),
     );

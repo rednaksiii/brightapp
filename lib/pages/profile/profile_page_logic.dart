@@ -2,34 +2,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePageLogic {
-  String _userName = 'Default Username';
-  String _userBio = 'Default Bio';
+  String userName = 'Default Username';
+  String userBio = 'Default Bio';
+  String? profileImageUrl;
   int followersCount = 0;
   int followingCount = 0;
+  List<Map<String, dynamic>> userPosts = [];
 
   final String userId;
 
   ProfilePageLogic(this.userId) {
-    _fetchUserData();
+    fetchUserData();
+    fetchUserPosts();
   }
 
-  // Getter for userName
-  String get userName => _userName;
-  set userName(String value) => _userName = value;
-
-  // Getter for userBio
-  String get userBio => _userBio;
-  set userBio(String value) => _userBio = value;
-
-  // Fetch data from Firestore
-  Future<void> _fetchUserData() async {
+  // Fetch user data from Firestore
+  Future<void> fetchUserData() async {
     try {
       final doc = FirebaseFirestore.instance.collection('users').doc(userId);
       final snapshot = await doc.get();
 
       if (snapshot.exists) {
-        _userName = snapshot.get('username') ?? 'Default Username';
-        _userBio = snapshot.get('bio') ?? 'Default Bio';
+        userName = snapshot.get('username') ?? 'Default Username';
+        userBio = snapshot.get('bio') ?? 'Default Bio';
+        profileImageUrl = snapshot.get('profileImageUrl');
         followersCount = snapshot.get('followers') ?? 0;
         followingCount = snapshot.get('following') ?? 0;
       }
@@ -38,20 +34,24 @@ class ProfilePageLogic {
     }
   }
 
-  // Update follower/following count in Firestore
-  Future<void> updateFollowerFollowingCount() async {
+  // Fetch user posts from Firestore
+  Future<void> fetchUserPosts() async {
     try {
-      final doc = FirebaseFirestore.instance.collection('users').doc(userId);
-      await doc.update({
-        'followers': followersCount,
-        'following': followingCount,
-      });
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('userId', isEqualTo: userId)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      userPosts = querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
     } catch (e) {
-      print("Error updating follower/following count: $e");
+      print("Error fetching user posts: $e");
     }
   }
 
-  // Function to listen to updates in follower and following count
+  // Listen for real-time updates to follower and following count
   void listenToFollowerFollowingUpdates() {
     FirebaseFirestore.instance
         .collection('users')
@@ -61,7 +61,6 @@ class ProfilePageLogic {
       if (snapshot.exists) {
         followersCount = snapshot.get('followers') ?? 0;
         followingCount = snapshot.get('following') ?? 0;
-        // Notify listeners if needed (if using a state management solution like Provider)
       }
     });
   }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:brightapp/pages/profile/profile_imagepicker.dart';
-import 'package:image_picker/image_picker.dart';
 import 'profile_page_logic.dart';
 import 'edit_profile_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brightapp/pages/post_detail/post_detail_page.dart';
 
 class ProfilePageUI extends StatefulWidget {
   const ProfilePageUI({Key? key}) : super(key: key);
@@ -16,9 +14,6 @@ class ProfilePageUI extends StatefulWidget {
 
 class _ProfilePageUIState extends State<ProfilePageUI> {
   late ProfilePageLogic profileLogic;
-  File? _profileImage;
-  String? _profileImageUrl;
-  List<File> _postImages = [];
 
   @override
   void initState() {
@@ -26,86 +21,26 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
     final userId = FirebaseAuth.instance.currentUser!.uid;
     profileLogic = ProfilePageLogic(userId);
     profileLogic.listenToFollowerFollowingUpdates();
-    _loadProfileData();
+    _fetchProfileData();
   }
 
-  Future<void> _loadProfileData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      profileLogic.userName = prefs.getString('username') ?? 'Default Username';
-      profileLogic.userBio = prefs.getString('bio') ?? 'Default Bio';
-      String? profileImageUrl = prefs.getString('profileImageUrl');
-
-      // Set _profileImageUrl from FirebaseAuth photoURL if available
-      final userPhotoURL = FirebaseAuth.instance.currentUser?.photoURL;
-      _profileImageUrl = userPhotoURL ?? profileImageUrl;
-
-      List<String>? postImagePaths = prefs.getStringList('postImages');
-      if (postImagePaths != null) {
-        _postImages = postImagePaths.map((path) => File(path)).toList();
-      }
-    });
+  Future<void> _fetchProfileData() async {
+    await profileLogic.fetchUserData();
+    await profileLogic.fetchUserPosts();
+    setState(() {}); // Refresh UI with fetched data
   }
 
-  Future<void> _saveProfileData(
-      String username, String bio, String? imagePath) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
-    await prefs.setString('bio', bio);
-    if (imagePath != null) {
-      await prefs.setString('profileImageUrl', imagePath);
-    }
-    List<String> postImagePaths = _postImages.map((file) => file.path).toList();
-    await prefs.setStringList('postImages', postImagePaths);
-  }
-
-  Future<void> _pickPostImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100,
+  Future<void> _pickProfileImage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileImagePickerPage()),
     );
-
-    if (image != null) {
+    if (result != null) {
       setState(() {
-        _postImages.add(File(image.path));
+        profileLogic.profileImageUrl = result;
       });
-      await _saveProfileData(
-          profileLogic.userName, profileLogic.userBio, _profileImage?.path);
+      await profileLogic.fetchUserData(); // Update Firestore with the new profile image
     }
-  }
-
-  Future<void> _deletePostImage(int index) async {
-    bool? confirmed = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Post'),
-        content: const Text('Are you sure you want to delete this post?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      setState(() {
-        _postImages.removeAt(index);
-      });
-      await _saveProfileData(
-          profileLogic.userName, profileLogic.userBio, _profileImage?.path);
-    }
-  }
-
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -118,31 +53,14 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
         children: [
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ProfileImagePickerPage(),
-                ),
-              ).then((downloadUrl) {
-                if (downloadUrl != null) {
-                  setState(() {
-                    _profileImageUrl = downloadUrl;
-                  });
-                  _saveProfileData(
-                      profileLogic.userName, profileLogic.userBio, downloadUrl);
-                }
-              });
-            },
+            onTap: _pickProfileImage,
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: _profileImageUrl != null
-                  ? (_profileImageUrl!.startsWith('http')
-                      ? NetworkImage(_profileImageUrl!)
-                      : FileImage(File(_profileImageUrl!)) as ImageProvider)
-                  : const AssetImage('https://via.placeholder.com/150'),
+              backgroundImage: profileLogic.profileImageUrl != null
+                  ? NetworkImage(profileLogic.profileImageUrl!) as ImageProvider
+                  : const AssetImage('assets/images/profile_picture.png'),
               onBackgroundImageError: (_, __) => const AssetImage(
-                  'https://via.placeholder.com/150'), // Fallback if URL is invalid
+                  'assets/images/profile_picture.png'), // Fallback if URL is invalid
             ),
           ),
           const SizedBox(height: 20),
@@ -164,9 +82,7 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-          // Centralized Follower and Following Counts
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -182,7 +98,7 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                     const Text('Followers'),
                   ],
                 ),
-                const SizedBox(width: 40), // Space between the two counts
+                const SizedBox(width: 40),
                 Column(
                   children: [
                     Text(
@@ -217,8 +133,6 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
                         profileLogic.userName = result['username'];
                         profileLogic.userBio = result['bio'];
                       });
-                      _saveProfileData(result['username'], result['bio'],
-                          _profileImage?.path);
                     }
                   });
                 },
@@ -227,64 +141,28 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
             ),
           ),
           const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: _pickPostImage,
-                child: const Text('Add Post Image'),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: _logout,
-                child: const Text('Log Out'),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                childAspectRatio: 1.0,
                 mainAxisSpacing: 8.0,
                 crossAxisSpacing: 8.0,
               ),
-              itemCount: _postImages.length,
+              itemCount: profileLogic.userPosts.length,
               itemBuilder: (context, index) {
+                final post = profileLogic.userPosts[index];
                 return GestureDetector(
-                  onLongPress: () => _deletePostImage(index),
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: DecorationImage(
-                            image: FileImage(_postImages[index]),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PostDetailPage(postData: post),
                       ),
-                      Positioned(
-                        right: 5,
-                        top: 5,
-                        child: GestureDetector(
-                          onTap: () => _deletePostImage(index),
-                          child: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
+                    );
+                  },
+                  child: Image.network(
+                    post['imageUrl'],
+                    fit: BoxFit.cover,
                   ),
                 );
               },
