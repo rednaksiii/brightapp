@@ -3,6 +3,8 @@ import 'package:brightapp/pages/profile/profile_page_ui.dart';
 import 'package:brightapp/pages/search/search_page_ui.dart'; // Import the search page UI
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:brightapp/pages/activity/activity_page_ui.dart';
+
 
 class ControllerWrapper extends StatefulWidget {
   const ControllerWrapper({super.key});
@@ -19,7 +21,7 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
     const HomePageUI(), // Home Page
     const SearchPageUI(), // Updated to show SearchPageUI
     const Center(child: Text('Post Page')), // Placeholder for Post Page
-    const Center(child: Text('Activity Page')), // Placeholder for Activity Page
+    const ActivityPageUI(),
     const ProfilePageUI(), // Profile Page
   ];
 
