@@ -26,10 +26,10 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
   List<XFile>? _editedImageFiles;
 
   Future<void> _onImageButtonPressed(
-    ImageSource source, {
-    required BuildContext context,
-    bool isMultiImage = false,
-  }) async {
+      ImageSource source, {
+        required BuildContext context,
+        bool isMultiImage = false,
+      }) async {
     try {
       if (isMultiImage) {
         final List<XFile> pickedFileList = await _picker.pickMultiImage();
@@ -54,87 +54,87 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
     }
   }
 
-Future<void> _applyFilter(int index) async {
-  if (_imageFileList == null || _imageFileList!.isEmpty) return;
+  Future<void> _applyFilter(int index) async {
+    if (_imageFileList == null || _imageFileList!.isEmpty) return;
 
-  String fileName = path.basename(_imageFileList![index].path);
+    String fileName = path.basename(_imageFileList![index].path);
 
-  // Decode and apply orientation to the image
-  img.Image originalImage = img.decodeImage(File(_imageFileList![index].path).readAsBytesSync())!;
-  originalImage = img.bakeOrientation(originalImage); // Fix rotation
+    // Decode and apply orientation to the image
+    img.Image originalImage = img.decodeImage(File(_imageFileList![index].path).readAsBytesSync())!;
+    originalImage = img.bakeOrientation(originalImage); // Fix rotation
 
-  // Use PhotoFilterSelector with rounded corners
-  Map? imageFile = await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (BuildContext context) => Scaffold(
-        body: Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16), // Rounded corners
-            child: PhotoFilterSelector(
-              title: const Text("Apply Filter"),
-              image: originalImage,
-              filters: presetFiltersList,
-              filename: fileName,
-              loader: const Center(child: CircularProgressIndicator()),
-              appBarColor: Colors.white,
-              fit: BoxFit.contain, // Keep aspect ratio
+    // Use PhotoFilterSelector with rounded corners
+    Map? imageFile = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => Scaffold(
+          body: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16), // Rounded corners
+              child: PhotoFilterSelector(
+                title: const Text("Apply Filter"),
+                image: originalImage,
+                filters: presetFiltersList,
+                filename: fileName,
+                loader: const Center(child: CircularProgressIndicator()),
+                appBarColor: Colors.white,
+                fit: BoxFit.contain, // Keep aspect ratio
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
 
-  // Update edited image if filtering was successful
-  if (imageFile != null && imageFile.containsKey('image_filtered')) {
-    setState(() {
-      _editedImageFiles![index] = XFile(imageFile['image_filtered'].path);
-    });
+    // Update edited image if filtering was successful
+    if (imageFile != null && imageFile.containsKey('image_filtered')) {
+      setState(() {
+        _editedImageFiles![index] = XFile(imageFile['image_filtered'].path);
+      });
+    }
   }
-}
 
 
-Future<void> _uploadAndPostImages() async {
-  if (_editedImageFiles == null || _editedImageFiles!.isEmpty) return;
+  Future<void> _uploadAndPostImages() async {
+    if (_editedImageFiles == null || _editedImageFiles!.isEmpty) return;
 
     setState(() {
       _isUploading = true;
     });
 
-  String caption = _captionController.text;
-  User? user = FirebaseAuth.instance.currentUser;
-  
-  if (user == null) {
-    print("Error: No authenticated user");
-    setState(() => _isUploading = false);
-    return;
-  }
+    String caption = _captionController.text;
+    User? user = FirebaseAuth.instance.currentUser;
 
-  String username = user.displayName ?? 'Anonymous';
-  print("Posting as username: $username");
-
-  String profilePicture = user.photoURL ?? 'https://via.placeholder.com/150';
-  String userId = user.uid;
-
-  for (XFile imageFile in _editedImageFiles!) {
-    final imageUrl = await uploadImageToFirebase(imageFile);
-    
-    if (imageUrl != null) {
-      await createPost(imageUrl, caption, userId, username, profilePicture);
-    } else {
-      print('Image upload failed, skipping post creation.');
+    if (user == null) {
+      print("Error: No authenticated user");
+      setState(() => _isUploading = false);
+      return;
     }
+
+    String username = user.displayName ?? 'Anonymous';
+    print("Posting as username: $username");
+
+    String profilePicture = user.photoURL ?? 'https://via.placeholder.com/150';
+    String userId = user.uid;
+
+    for (XFile imageFile in _editedImageFiles!) {
+      final imageUrl = await uploadImageToFirebase(imageFile);
+
+      if (imageUrl != null) {
+        await createPost(imageUrl, caption, userId, username, profilePicture);
+      } else {
+        print('Image upload failed, skipping post creation.');
+      }
+    }
+
+    setState(() {
+      _isUploading = false;
+      _imageFileList = null;
+      _captionController.clear();
+    });
+
+    if (mounted) Navigator.pop(context);
   }
-
-  setState(() {
-    _isUploading = false;
-    _imageFileList = null;
-    _captionController.clear();
-  });
-
-  if (mounted) Navigator.pop(context);
-}
 
 
 
@@ -157,16 +157,16 @@ Future<void> _uploadAndPostImages() async {
           child: _isUploading
               ? const CircularProgressIndicator()
               : Column(
-                  children: [
-                    Expanded(
-                      child: !_imagesPicked
-                          ? _showInitialButtons()
-                          : (!_editingEnabled
-                              ? _editOptions()
-                              : _filteredImageAndCaption()),
-                    ),
-                  ],
-                ),
+            children: [
+              Expanded(
+                child: !_imagesPicked
+                    ? _showInitialButtons()
+                    : (!_editingEnabled
+                    ? _editOptions()
+                    : _filteredImageAndCaption()),
+              ),
+            ],
+          ),
         ),
       ),
     );
