@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:brightapp/controllers/firebase_services.dart';
 import 'package:brightapp/pages/user_profile/user_profile_page_ui.dart';
+import 'package:brightapp/pages/activity/notification_service.dart'; // Import notification service
 
 class HomePageUI extends StatefulWidget {
   const HomePageUI({super.key});
@@ -19,7 +20,7 @@ class _HomePageUIState extends State<HomePageUI> {
       isLoading = true;
     });
 
-    randomPosts = await fetchRandomPosts(6); // Fetch 5-6 posts
+    randomPosts = await fetchRandomPosts(6); // Fetch 6 random posts
 
     setState(() {
       isLoading = false;
@@ -39,22 +40,22 @@ class _HomePageUIState extends State<HomePageUI> {
         child: isLoading
             ? const CircularProgressIndicator()
             : randomPosts.isNotEmpty
-                ? ListView.builder(
-                    itemCount: randomPosts.length,
-                    itemBuilder: (context, index) {
-                      final post = randomPosts[index];
-                      return PostItem(
-                        username: post['username'] ?? 'Anonymous',
-                        profilePicture: post['profilePicture'] ??
-                            'https://via.placeholder.com/150',
-                        imageUrl: post['imageUrl'] ??
-                            'https://via.placeholder.com/300', // Handle null imageUrl
-                        caption: post['caption'] ?? '',
-                        userId: post['userId'] ?? 'unknown',
-                      );
-                    },
-                  )
-                : const Center(child: Text("No posts available")),
+            ? ListView.builder(
+          itemCount: randomPosts.length,
+          itemBuilder: (context, index) {
+            final post = randomPosts[index];
+            return PostItem(
+              username: post['username'] ?? 'Anonymous',
+              profilePicture: post['profilePicture'] ??
+                  'https://via.placeholder.com/150',
+              imageUrl: post['imageUrl'] ?? 'https://via.placeholder.com/300',
+              caption: post['caption'] ?? '',
+              userId: post['userId'] ?? 'unknown',
+              postId: post['postId'] ?? 'unknown',
+            );
+          },
+        )
+            : const Center(child: Text("No posts available")),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: fetchRandomPostsData, // Refreshes the feed
@@ -64,13 +65,13 @@ class _HomePageUIState extends State<HomePageUI> {
   }
 }
 
-// Individual Post Item Widget
-class PostItem extends StatelessWidget {
+class PostItem extends StatefulWidget {
   final String username;
   final String profilePicture;
   final String imageUrl;
   final String caption;
   final String userId;
+  final String postId;
 
   const PostItem({
     super.key,
@@ -79,7 +80,73 @@ class PostItem extends StatelessWidget {
     required this.imageUrl,
     required this.caption,
     required this.userId,
+    required this.postId,
   });
+
+  @override
+  _PostItemState createState() => _PostItemState();
+}
+
+class _PostItemState extends State<PostItem> {
+  bool isLiked = false;
+  TextEditingController commentController = TextEditingController();
+
+  // Function to handle like toggling with Firestore (if needed)
+  Future<void> _toggleLike() async {
+    setState(() {
+      isLiked = !isLiked;
+    });
+
+    await toggleLike(
+      widget.postId,
+      widget.userId,
+      isLiked,
+      widget.userId,
+    );
+  }
+
+  // Function to handle comment submission
+  Future<void> _addComment() async {
+    if (commentController.text.isNotEmpty) {
+      // Add a local notification when a comment is added
+      addNotification("Your post received a comment: ${commentController.text}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Comment added: ${commentController.text}")),
+      );
+
+      commentController.clear();
+    }
+  }
+
+  void _showCommentDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add a Comment"),
+          content: TextField(
+            controller: commentController,
+            decoration: const InputDecoration(hintText: "Enter your comment"),
+            maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _addComment(); // Submit comment
+              },
+              child: const Text("Submit"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +156,6 @@ class PostItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Post header with profile picture and username
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -99,28 +165,42 @@ class PostItem extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UserProfilePageUI(userId: userId),
+                        builder: (context) =>
+                            UserProfilePageUI(userId: widget.userId),
                       ),
                     );
                   },
                   child: CircleAvatar(
-                    backgroundImage: NetworkImage(profilePicture),
+                    backgroundImage: NetworkImage(widget.profilePicture),
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(username,
+                Text(widget.username,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
-          // Post image
-          Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity),
-          // Post caption
+          Image.network(widget.imageUrl, fit: BoxFit.cover, width: double.infinity),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              caption,
-              style: const TextStyle(fontSize: 16),
+            child: Text(widget.caption, style: const TextStyle(fontSize: 16)),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: isLiked ? Colors.red : null),
+                  onPressed: _toggleLike, // Like toggling function
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: const Icon(Icons.comment),
+                  onPressed: _showCommentDialog, // Comment dialog function
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 10),
