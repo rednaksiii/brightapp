@@ -8,13 +8,13 @@ class HomePageLogic {
         .orderBy('timestamp', descending: true) // Order posts by timestamp (newest first)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
-              return {
-                'userId': doc['userId'], // Include the userId
-                'username': doc['username'] ?? 'Anonymous',
-                'profilePicture': doc['profilePicture'] ?? 'https://via.placeholder.com/150',
-                'imageUrl': doc['imageUrl'],
-                'caption': doc['caption'],
-              };
-            }).toList());
+      return {
+        'userId': doc['userId'], // Include the userId
+        'username': doc['username'] ?? 'Anonymous',
+        'profilePicture': doc['profilePicture'] ?? 'https://via.placeholder.com/150',
+        'imageUrl': doc['imageUrl'],
+        'caption': doc['caption'],
+      };
+    }).toList());
   }
 }
