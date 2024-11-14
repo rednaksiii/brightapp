@@ -1,10 +1,14 @@
-// Import necessary packages
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:brightapp/pages/activity/notification_service.dart'; // Import the notification service
 
-class ActivityPageUI extends StatelessWidget {
+class ActivityPageUI extends StatefulWidget {
   const ActivityPageUI({super.key});
 
+  @override
+  _ActivityPageUIState createState() => _ActivityPageUIState();
+}
+
+class _ActivityPageUIState extends State<ActivityPageUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,21 +17,14 @@ class ActivityPageUI extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
       ),
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('notifications').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return ListView(
-            children: snapshot.data!.docs.map((doc) {
-              return ListTile(
-                leading: Icon(Icons.notifications, color: Colors.blue),
-                title: Text(doc['title'] ?? 'Notification'),
-                subtitle: Text(doc['message'] ?? 'No message'),
-                trailing: Text(doc['timestamp'].toDate().toString()), // Adjust formatting as needed
-              );
-            }).toList(),
+      body: notifications.isEmpty
+          ? const Center(child: Text("No notifications yet."))
+          : ListView.builder(
+        itemCount: notifications.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: const Icon(Icons.notifications, color: Colors.blue),
+            title: Text(notifications[index]),
           );
         },
       ),
