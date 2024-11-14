@@ -4,6 +4,9 @@ import 'profile_page_logic.dart';
 import 'edit_profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brightapp/pages/post_detail/post_detail_page.dart';
+import 'package:provider/provider.dart';
+import 'package:brightapp/controllers/auth_controller.dart';
+
 
 class ProfilePageUI extends StatefulWidget {
   const ProfilePageUI({Key? key}) : super(key: key);
@@ -48,6 +51,15 @@ class _ProfilePageUIState extends State<ProfilePageUI> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Provider.of<AuthController>(context, listen: false).signOut();
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
