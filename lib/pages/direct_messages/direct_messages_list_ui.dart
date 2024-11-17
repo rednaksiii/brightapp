@@ -15,52 +15,48 @@ class DirectMessagesListUI extends StatelessWidget {
         title: const Text('Direct Messages'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('conversations')
-            .where('participants', arrayContains: currentUserId)
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('users').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No conversations yet.'));
+            return const Center(child: Text('No users found.'));
           }
 
-          var conversations = snapshot.data!.docs;
+          var users = snapshot.data!.docs;
 
           return ListView.builder(
-            itemCount: conversations.length,
+            itemCount: users.length,
             itemBuilder: (context, index) {
-              var conversation = conversations[index];
-              var participantIds = List<String>.from(conversation['participants']);
-              String otherUserId = participantIds.firstWhere((id) => id != currentUserId);
+              var user = users[index];
+              var userId = user.id;
 
-              return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
-                builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData) {
-                    return const ListTile(title: Text('Loading...'));
-                  }
+              // Skip current user in the list
+              if (userId == currentUserId) {
+                return const SizedBox.shrink();
+              }
 
-                  var userData = userSnapshot.data!;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(userData['profileImageUrl'] ?? 'https://via.placeholder.com/150'),
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    user['profileImageUrl'] ?? 'https://via.placeholder.com/150',
+                  ),
+                ),
+                title: Text(user['username'] ?? 'Anonymous'),
+                onTap: () async {
+                  // Check if a conversation already exists between users
+                  var conversationId = await _getOrCreateConversation(currentUserId, userId);
+
+                  // Navigate to Chat Page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatPageUI(
+                        conversationId: conversationId,
+                        otherUserId: userId,
+                      ),
                     ),
-                    title: Text(userData['username'] ?? 'Anonymous'),
-                    subtitle: Text(conversation['lastMessage'] ?? ''),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatPageUI(
-                            conversationId: conversation.id,
-                            otherUserId: otherUserId,
-                          ),
-                        ),
-                      );
-                    },
                   );
                 },
               );
@@ -69,5 +65,29 @@ class DirectMessagesListUI extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<String> _getOrCreateConversation(String currentUserId, String otherUserId) async {
+    // Query for an existing conversation
+    var conversationsQuery = await FirebaseFirestore.instance
+        .collection('conversations')
+        .where('participants', arrayContains: currentUserId)
+        .get();
+
+    for (var doc in conversationsQuery.docs) {
+      var participants = List<String>.from(doc['participants']);
+      if (participants.contains(otherUserId)) {
+        return doc.id; // Return the existing conversation ID
+      }
+    }
+
+    // Create a new conversation if it doesn't exist
+    var newConversation = await FirebaseFirestore.instance.collection('conversations').add({
+      'participants': [currentUserId, otherUserId],
+      'lastMessage': '',
+      'lastUpdated': FieldValue.serverTimestamp(),
+    });
+
+    return newConversation.id;
   }
 }
