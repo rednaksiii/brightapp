@@ -32,7 +32,7 @@ class DirectMessagesListUI extends StatelessWidget {
               var user = users[index];
               var userId = user.id;
 
-              // Skip current user in the list
+              // Skip the current user in the list
               if (userId == currentUserId) {
                 return const SizedBox.shrink();
               }
@@ -45,10 +45,10 @@ class DirectMessagesListUI extends StatelessWidget {
                 ),
                 title: Text(user['username'] ?? 'Anonymous'),
                 onTap: () async {
-                  // Check if a conversation already exists between users
-                  var conversationId = await _getOrCreateConversation(currentUserId, userId);
+                  // Get or create the conversation
+                  String conversationId = await _getOrCreateConversation(currentUserId, userId);
 
-                  // Navigate to Chat Page
+                  // Navigate to the chat page
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -68,26 +68,31 @@ class DirectMessagesListUI extends StatelessWidget {
   }
 
   Future<String> _getOrCreateConversation(String currentUserId, String otherUserId) async {
-    // Query for an existing conversation
-    var conversationsQuery = await FirebaseFirestore.instance
-        .collection('conversations')
-        .where('participants', arrayContains: currentUserId)
-        .get();
+    try {
+      // Query for existing conversation
+      var conversationsQuery = await FirebaseFirestore.instance
+          .collection('conversations')
+          .where('participants', arrayContains: currentUserId)
+          .get();
 
-    for (var doc in conversationsQuery.docs) {
-      var participants = List<String>.from(doc['participants']);
-      if (participants.contains(otherUserId)) {
-        return doc.id; // Return the existing conversation ID
+      for (var doc in conversationsQuery.docs) {
+        var participants = List<String>.from(doc['participants']);
+        if (participants.contains(otherUserId)) {
+          return doc.id; // Return the existing conversation ID
+        }
       }
+
+      // Create a new conversation
+      var newConversation = await FirebaseFirestore.instance.collection('conversations').add({
+        'participants': [currentUserId, otherUserId],
+        'lastMessage': '',
+        'lastUpdated': FieldValue.serverTimestamp(),
+      });
+
+      return newConversation.id;
+    } catch (e) {
+      print("Error creating conversation: $e");
+      throw Exception("Unable to create or fetch conversation.");
     }
-
-    // Create a new conversation if it doesn't exist
-    var newConversation = await FirebaseFirestore.instance.collection('conversations').add({
-      'participants': [currentUserId, otherUserId],
-      'lastMessage': '',
-      'lastUpdated': FieldValue.serverTimestamp(),
-    });
-
-    return newConversation.id;
   }
 }

@@ -6,7 +6,11 @@ class ChatPageUI extends StatefulWidget {
   final String conversationId;
   final String otherUserId;
 
-  const ChatPageUI({Key? key, required this.conversationId, required this.otherUserId}) : super(key: key);
+  const ChatPageUI({
+    Key? key,
+    required this.conversationId,
+    required this.otherUserId,
+  }) : super(key: key);
 
   @override
   _ChatPageUIState createState() => _ChatPageUIState();
@@ -22,22 +26,37 @@ class _ChatPageUIState extends State<ChatPageUI> {
     String text = _messageController.text.trim();
     _messageController.clear();
 
-    await FirebaseFirestore.instance
-        .collection('messages')
-        .doc(widget.conversationId)
-        .collection('messages')
-        .add({
-      'senderId': currentUserId,
-      'receiverId': widget.otherUserId,
-      'text': text,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    try {
+      // Add the message to the 'messages' subcollection under 'conversations'
+      await FirebaseFirestore.instance
+          .collection('conversations')
+          .doc(widget.conversationId)
+          .collection('messages')
+          .add({
+        'senderId': currentUserId,
+        'receiverId': widget.otherUserId,
+        'text': text,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    await FirebaseFirestore.instance.collection('conversations').doc(widget.conversationId).set({
-      'participants': [currentUserId, widget.otherUserId],
-      'lastMessage': text,
-      'lastUpdated': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+      // Update the conversation document with the last message details
+      await FirebaseFirestore.instance
+          .collection('conversations')
+          .doc(widget.conversationId)
+          .set({
+        'lastMessage': text,
+        'lastUpdated': FieldValue.serverTimestamp(),
+        // Ensure both participants are included
+        'participants': [currentUserId, widget.otherUserId],
+      }, SetOptions(merge: true)); // Use merge to avoid overwriting existing fields
+
+      print("Message sent successfully.");
+    } catch (e) {
+      print("Error sending message: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to send message")),
+      );
+    }
   }
 
   @override
@@ -51,7 +70,7 @@ class _ChatPageUIState extends State<ChatPageUI> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('messages')
+                  .collection('conversations')
                   .doc(widget.conversationId)
                   .collection('messages')
                   .orderBy('timestamp', descending: true)
@@ -71,21 +90,29 @@ class _ChatPageUIState extends State<ChatPageUI> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     var message = messages[index];
-                    bool isSentByCurrentUser = message['senderId'] == currentUserId;
+                    bool isSentByCurrentUser =
+                        message['senderId'] == currentUserId;
 
                     return Align(
-                      alignment: isSentByCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isSentByCurrentUser
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 8),
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isSentByCurrentUser ? Colors.blue : Colors.grey[300],
+                          color: isSentByCurrentUser
+                              ? Colors.blue
+                              : Colors.grey[300],
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           message['text'],
                           style: TextStyle(
-                            color: isSentByCurrentUser ? Colors.white : Colors.black,
+                            color: isSentByCurrentUser
+                                ? Colors.white
+                                : Colors.black,
                           ),
                         ),
                       ),
