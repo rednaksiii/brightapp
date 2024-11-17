@@ -1,6 +1,7 @@
 import 'package:brightapp/pages/home/home_page_ui.dart';
 import 'package:brightapp/pages/profile/profile_page_ui.dart';
 import 'package:brightapp/pages/search/search_page_ui.dart'; // Import the search page UI
+import 'package:brightapp/pages/direct_messages/direct_messages_list_ui.dart'; // Import Direct Messages List UI
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:brightapp/pages/activity/activity_page_ui.dart';
@@ -42,18 +43,18 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
   void _updatePages() {
     _pages.clear();
     _pages.addAll([
-      const HomePageUI(), 
-      const SearchPageUI(), 
-      const Center(child: Text('Post Page')), 
-      ActivityPageUI(), 
-      const ProfilePageUI(), 
+      const HomePageUI(),
+      const SearchPageUI(),
+      const Center(child: Text('Post Page')),
+      ActivityPageUI(),
+      const ProfilePageUI(),
     ]);
   }
 
   void _onItemTapped(int index) async {
     // If the "Post" tab is selected, open the image picker.
     if (index == 2) {
-      await Navigator.pushNamed(context, '/post'); 
+      await Navigator.pushNamed(context, '/post');
     } else {
       setState(() {
         _selectedIndex = index;
@@ -69,36 +70,41 @@ class _ControllerWrapperState extends State<ControllerWrapper> {
         elevation: 0,
         title: _selectedIndex == 0
             ? Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/app_icon.png', // Path to the app icon
-              width: 40, // Set the width for the app_icon
-              height: 40, // Set the height for the app_icon
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'BrightFeed',
-              style: TextStyle(color: Colors.black, fontSize: 24),
-            ),
-          ],
-        )
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/app_icon.png', // Path to the app icon
+                    width: 40, // Set the width for the app_icon
+                    height: 40, // Set the height for the app_icon
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'BrightFeed',
+                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  ),
+                ],
+              )
             : _selectedIndex == 4
-            ? const Text(
-          'Profile',
-          style: TextStyle(color: Colors.black, fontSize: 24),
-        )
-            : const Text(
-          'BrightApp',
-          style: TextStyle(color: Colors.black, fontSize: 24),
-        ),
+                ? const Text(
+                    'Profile',
+                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  )
+                : const Text(
+                    'BrightApp',
+                    style: TextStyle(color: Colors.black, fontSize: 24),
+                  ),
         centerTitle: true, // Center the app icon and title in the app bar
         actions: [
           if (_selectedIndex == 0)
             IconButton(
               icon: const Icon(Icons.send, color: Colors.black),
               onPressed: () {
-                // Direct Messages button functionality to be implemented later
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DirectMessagesListUI(),
+                  ),
+                );
               },
             ),
         ],
