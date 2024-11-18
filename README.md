@@ -10,14 +10,6 @@ Bright App is a simple yet elegant Instagram-like photo-sharing app built using 
 - **Feed Page:** A dynamic feed page displaying a list of sample posts with user interactions.
 - **Logout Functionality:** Easily log out and return to the login page.
 
-## 📱 Screenshots
-
-| Welcome Page                          | Feed Page                               | Profile Page                            |
-| ------------------------------------- | --------------------------------------- | --------------------------------------- |
-| ![Welcome Page](https://via.placeholder.com/300x600) | ![Feed Page](https://via.placeholder.com/300x600) | ![Profile Page](https://via.placeholder.com/300x600) |
-
-_(Replace the above image URLs with actual screenshots from your app)_
-
 ## 🚀 Getting Started
 
 Follow these steps to get the Bright App up and running on your local machine.
@@ -65,13 +57,15 @@ lib/
 ├── pages/                      # Contains individual screens of the app
 │   ├── home_page.dart          # Home page with user details and feed
 │   ├── login_page.dart         # Login page for authentication
-│   ├── profile_page.dart       # Profile page displaying the user's infomation
+│   ├── register_page.dart      # Registration page for new users
+│   ├── profile_page.dart       # Profile page displaying the user's information
 │   ├── controller_wrapper.dart # Wrapper page managing the bottom navigation
-│   └── register_page.dart      # Registration page for new users
-├── controlers/                 # Custom widgets used throughout the app
-│    └── auth_controller.dart   # Controller for handling authentication
+│   ├── direct_messages_list_ui.dart # Direct messages list screen
+│   └── chat_page_ui.dart        # Chat screen for direct messages
+├── controllers/                # Controllers used throughout the app
+│   └── auth_controller.dart    # Controller for handling authentication
 └── widgets/                    # Custom widgets used throughout the app
-    └── post_item.dart          # Widget for displaying individual posts in the feed (not added yet)  
+    └── post_item.dart          # Widget for displaying individual posts in the feed (not added yet)
     
 ```
 
